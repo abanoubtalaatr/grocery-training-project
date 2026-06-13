@@ -10,7 +10,7 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::query()->filter($request); //scopeFilter
-        return response()->json($categories->get());
+        $categories = Category::query()->filter($request)->paginate($request->integer('per_page', 10));
+        return response()->json($categories);
     }
 }
