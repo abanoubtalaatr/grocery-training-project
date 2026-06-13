@@ -13,4 +13,5 @@ class CategoryFilter extends QueryFilter
     {
         $this->builder->where('is_active', $value);
     }
+
 }

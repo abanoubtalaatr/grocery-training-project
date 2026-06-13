@@ -8,8 +8,20 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request) {
-        $categories = Category::query()->filter($request); 
-        return response()->json($categories->get()); 
+    public function index(Request $request)
+    {
+        $perPage = min(max((int) $request->input('per_page', 2), 1), 50);
+        $categories = Category::query()->filter($request)->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $categories->items(),
+            'meta' => [
+                'current_page' => $categories->currentPage(),
+                'last_page' => $categories->lastPage(),
+                'per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+            ],
+        ]);
     }
 }
