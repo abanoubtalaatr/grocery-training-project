@@ -10,6 +10,7 @@ class ApiCategoryController extends Controller
 {
   public function index(Request $request)
   {
+
     $categories = Category::query()->filter($request)->paginate(3);
 
     return response()->json($categories);
