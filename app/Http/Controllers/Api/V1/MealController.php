@@ -10,8 +10,10 @@ class MealController extends Controller
 {
     public function index(Request $request)
     {
-        $meals = Meal::query()->filter($request);
+        $meals = Meal::query()
+            ->filter($request)
+            ->paginate(5);
 
-        return response()->json($meals->get());
+        return response()->json($meals);
     }
 }

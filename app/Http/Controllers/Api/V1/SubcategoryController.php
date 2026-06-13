@@ -10,8 +10,10 @@ class SubcategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $subcategories = Subcategory::query()->filter($request);
+        $subcategories = Subcategory::query()
+            ->filter($request)
+            ->paginate(5);
 
-        return response()->json($subcategories->get());
+        return response()->json($subcategories);
     }
 }

@@ -10,8 +10,10 @@ class ReviewController extends Controller
 {
     public function reviews(Request $request)
     {
-        $reviews = Review::query()->filter($request);
+        $reviews = Review::query()
+            ->filter($request)
+            ->paginate(5);
 
-        return response()->json($reviews->get());
+        return response()->json($reviews);
     }
 }
