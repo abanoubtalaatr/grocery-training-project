@@ -10,8 +10,8 @@ class ApiOffersController extends Controller
 {
   public function index(Request $request)
   {
-    $offers = Offer::query()->filter($request);
+    $offers = Offer::query()->filter($request)->paginate(3);
 
-    return response()->json($offers->get());
+    return response()->json($offers);
   }
 }

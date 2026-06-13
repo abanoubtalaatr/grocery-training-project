@@ -10,8 +10,8 @@ class ApiReviewController extends Controller
 {
   public function index(Request $request)
   {
-    $reviews = Review::query()->filter($request);
+    $reviews = Review::query()->filter($request)->paginate(3);
 
-    return response()->json($reviews->get());
+    return response()->json($reviews);
   }
 }
