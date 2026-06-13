@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Concerns\Filterable;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Filterable;
 
     /** Fallback when no image is stored (API always exposes a usable URL). */
     public const DEFAULT_IMAGE_URL = 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400';
@@ -75,7 +76,7 @@ class Category extends Model
      */
     public function getImageUrlAttribute(): string
     {
-        if (! $this->image) {
+        if (!$this->image) {
             return self::DEFAULT_IMAGE_URL;
         }
 
@@ -83,7 +84,7 @@ class Category extends Model
             return $this->image;
         }
 
-        return asset('storage/'.$this->image);
+        return asset('storage/' . $this->image);
     }
 
     /**
@@ -94,13 +95,13 @@ class Category extends Model
         parent::boot();
 
         static::creating(function ($category) {
-            if (! $category->slug) {
+            if (!$category->slug) {
                 $category->slug = Str::slug($category->name);
             }
         });
 
         static::updating(function ($category) {
-            if ($category->isDirty('name') && ! $category->isDirty('slug')) {
+            if ($category->isDirty('name') && !$category->isDirty('slug')) {
                 $category->slug = Str::slug($category->name);
             }
         });
