@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Concerns\Filterable;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, Filterable;
 
     protected $fillable = [
         'user_id',
@@ -108,7 +109,7 @@ class Order extends Model
      */
     public function getStatusPositionAttribute(): int
     {
-        return match($this->status) {
+        return match ($this->status) {
             'awaiting_payment' => 0,
             'placed' => 1,
             'processing' => 2,
@@ -125,7 +126,7 @@ class Order extends Model
      */
     public function getStatusDescriptionAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'awaiting_payment' => 'Awaiting payment',
             'placed' => 'Order placed',
             'processing' => 'Processing',
