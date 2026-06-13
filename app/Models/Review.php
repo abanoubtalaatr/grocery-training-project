@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Review extends Model
 {
-    use HasFactory;
+    use HasFactory, Filterable;
 
     protected $fillable = [
         'user_id',
@@ -73,8 +74,8 @@ class Review extends Model
     protected function images(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value ? json_decode($value, true) : [],
-            set: fn ($value) => $value ? json_encode($value) : null,
+            get: fn($value) => $value ? json_decode($value, true) : [],
+            set: fn($value) => $value ? json_encode($value) : null,
         );
     }
 
