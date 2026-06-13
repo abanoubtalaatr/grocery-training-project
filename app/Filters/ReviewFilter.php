@@ -10,4 +10,24 @@ class ReviewFilter extends QueryFilter
     {
         $this->builder->where('rating', $value);
     }
+
+    public function is_approved($value)
+    {
+        $this->builder->where('is_approved', $value);
+    }
+
+    public function meal_id($value)
+    {
+        $this->builder->where('meal_id', $value);
+    }
+
+    public function comment($value)
+    {
+        $this->builder->where('comment', 'like', "%{$value}%");
+    }
+
+    public function user_id($value)
+    {
+        $this->builder->where('user_id', $value);
+    }
 }

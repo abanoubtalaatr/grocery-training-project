@@ -13,6 +13,7 @@ class CategoryController extends Controller
     {
         $categories = Category::query()->filter($request);
 
-        return response()->json($categories->get());
+        return response()->json($categories->paginate($request->input('per_page', 5)));
+
     }
 }

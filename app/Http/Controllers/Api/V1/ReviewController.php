@@ -12,6 +12,6 @@ class ReviewController extends Controller
     {
         $reviews = Review::query()->filter($request);
 
-        return response()->json($reviews->get());
+        return response()->json($reviews->paginate($request->input('per_page', 5)));
     }
 }

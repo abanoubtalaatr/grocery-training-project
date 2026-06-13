@@ -13,6 +13,6 @@ class SubcategoryController extends Controller
     {
         $subcategories = Subcategory::query()->filter($request);
 
-        return response()->json($subcategories->get());
+        return response()->json($subcategories->paginate($request->input('per_page', 5)));
     }
 }
