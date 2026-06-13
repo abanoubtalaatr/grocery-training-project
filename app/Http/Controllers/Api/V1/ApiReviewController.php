@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Review;
 use Illuminate\Http\Request;
-use App\Models\Meal;
 
-class MealController extends Controller
+class ApiReviewController extends Controller
 {
   public function index(Request $request)
   {
-    $meals = Meal::query()->filter($request);
+    $reviews = Review::query()->filter($request);
 
-    return response()->json($meals->get());
+    return response()->json($reviews->get());
   }
 }
