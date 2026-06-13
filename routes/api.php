@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,11 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// api for getting latest meals, added , pagination , class filter, resource, trait , 
+Route::prefix('v1')->group(function () {
+    Route::get('/meals', [ApiMealController::class, 'index']);
+});
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
