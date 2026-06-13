@@ -30,7 +30,7 @@ use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
