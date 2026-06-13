@@ -353,7 +353,7 @@ class MealController extends Controller
             $allowedSortFields = ['created_at', 'price', 'rating', 'title', 'sold_count'];
             if (in_array($sortBy, $allowedSortFields)) {
                 if ($sortBy === 'price') {
-                    $query->orderByRaw('COALESCE(discount_price, price) '.$sortOrder);
+                    $query->orderByRaw('COALESCE(discount_price, price) ' . $sortOrder);
                 } else {
                     $query->orderBy($sortBy, $sortOrder);
                 }
@@ -367,47 +367,62 @@ class MealController extends Controller
                 $favoriteMealIds = $user->favorites()->pluck('meal_id')->toArray();
             }
 
-            $meals = $query->get()
-                ->map(function ($meal) use ($favoriteMealIds) {
-                    return [
-                        'id' => $meal->id,
-                        'title' => $meal->title,
-                        'slug' => $meal->slug,
-                        'description' => $meal->description,
-                        'image_url' => $meal->image_url,
-                        'offer_title' => $meal->offer_title,
-                        ...$meal->getApiPriceAttributes(),
-                        'has_offer' => $meal->hasOffer(),
-                        'rating' => (float) $meal->rating,
-                        'rating_count' => (int) $meal->rating_count,
-                        'size' => $meal->size,
-                        'brand' => $meal->brand,
-                        'stock_quantity' => $meal->stock_quantity,
-                        'in_stock' => $meal->isInStock(),
-                        'is_featured' => $meal->is_featured,
-                        'sold_count' => $meal->sold_count,
-                        'category' => [
-                            'id' => $meal->category->id,
-                            'name' => $meal->category->name,
-                        ],
-                        'subcategory' => $meal->subcategory ? [
-                            'id' => $meal->subcategory->id,
-                            'name' => $meal->subcategory->name,
-                        ] : null,
-                        'features' => $meal->features,
-                        'is_favorited' => in_array($meal->id, $favoriteMealIds),
-                        'created_at' => $meal->created_at,
-                    ];
-                });
+            $perPage = (int) $request->input('per_page', 15);
+            $perPage = $perPage > 0 ? min($perPage, 100) : 15;
 
-            $totalCount = $meals->count();
-            $isEmpty = $totalCount === 0;
+            $paginatedMeals = $query->paginate($perPage)->withQueryString();
+            $meals = $paginatedMeals->getCollection()->map(function ($meal) use ($favoriteMealIds) {
+                return [
+                    'id' => $meal->id,
+                    'title' => $meal->title,
+                    'slug' => $meal->slug,
+                    'description' => $meal->description,
+                    'image_url' => $meal->image_url,
+                    'offer_title' => $meal->offer_title,
+                    ...$meal->getApiPriceAttributes(),
+                    'has_offer' => $meal->hasOffer(),
+                    'rating' => (float) $meal->rating,
+                    'rating_count' => (int) $meal->rating_count,
+                    'size' => $meal->size,
+                    'brand' => $meal->brand,
+                    'stock_quantity' => $meal->stock_quantity,
+                    'in_stock' => $meal->isInStock(),
+                    'is_featured' => $meal->is_featured,
+                    'sold_count' => $meal->sold_count,
+                    'category' => [
+                        'id' => $meal->category->id,
+                        'name' => $meal->category->name,
+                    ],
+                    'subcategory' => $meal->subcategory ? [
+                        'id' => $meal->subcategory->id,
+                        'name' => $meal->subcategory->name,
+                    ] : null,
+                    'features' => $meal->features,
+                    'is_favorited' => in_array($meal->id, $favoriteMealIds),
+                    'created_at' => $meal->created_at,
+                ];
+            });
+
+            $isEmpty = $meals->isEmpty();
 
             return response()->json(array_merge([
                 'success' => true,
                 'message' => $isEmpty ? 'No products match your filters.' : 'Meals retrieved successfully',
                 'data' => $meals,
-                'total_count' => $totalCount,
+                'meta' => [
+                    'current_page' => $paginatedMeals->currentPage(),
+                    'per_page' => $paginatedMeals->perPage(),
+                    'total' => $paginatedMeals->total(),
+                    'last_page' => $paginatedMeals->lastPage(),
+                    'from' => $paginatedMeals->firstItem(),
+                    'to' => $paginatedMeals->lastItem(),
+                ],
+                'links' => [
+                    'first' => $paginatedMeals->url(1),
+                    'last' => $paginatedMeals->url($paginatedMeals->lastPage()),
+                    'prev' => $paginatedMeals->previousPageUrl(),
+                    'next' => $paginatedMeals->nextPageUrl(),
+                ],
                 'filters_applied' => [
                     'search' => $request->input('search'),
                     'category_id' => $request->input('category_id'),
@@ -523,7 +538,7 @@ class MealController extends Controller
             $meal = Meal::with([
                 'category',
                 'subcategory',
-                'reviews' => fn ($q) => $q->approved()->with('user:id,username,firstname,lastname')->orderBy('created_at', 'desc'),
+                'reviews' => fn($q) => $q->approved()->with('user:id,username,firstname,lastname')->orderBy('created_at', 'desc'),
             ])->findOrFail($id);
 
             return response()->json([
