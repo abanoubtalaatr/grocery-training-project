@@ -12,8 +12,25 @@ class CategoryFilter extends QueryFilter
         $this->builder->where('name', $value);
     }
 
-    public function is_available($value)
+    public function slug($value)
     {
-        $this->builder->where('is_available', $value);
+        $this->builder->where('slug', $value);
     }
+
+     public function description($value)
+    {
+        $this->builder->where('description', $value);
+    }
+
+     public function is_active($value)
+    {
+        $this->builder->where('is_active', $value);
+    }
+     public function sort_order($value)
+    {
+        $this->builder->where('sort_order', $value);
+    }
+   
+
+    
 }
