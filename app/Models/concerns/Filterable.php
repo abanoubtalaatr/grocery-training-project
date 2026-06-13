@@ -12,7 +12,7 @@ trait Filterable
     public function scopeFilter(Builder $query, Request $request): Builder
     {
         $static = self::resolveFilterClass();
-        
+
         return (new $static($request))->apply($query);
     }
 
