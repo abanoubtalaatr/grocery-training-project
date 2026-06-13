@@ -6,21 +6,21 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        $this->call([
-            CategorySeeder::class,
-            SubcategorySeeder::class,
-            MealSeeder::class,
-            LargeMealSeeder::class,
-            FaqSeeder::class,
-            StaticPageSeeder::class,
-            ContactMessageSeeder::class,
-            SettingSeeder::class,
-            SpecialNoteSeeder::class,
-        ]);
-    }
+  /**
+   * Seed the application's database.
+   */
+  public function run(): void
+  {
+    $this->call([
+      CategorySeeder::class,
+      SubcategorySeeder::class,
+      MealSeeder::class,
+      LargeMealSeeder::class,
+      FaqSeeder::class,
+      StaticPageSeeder::class,
+      ContactMessageSeeder::class,
+      SettingSeeder::class,
+      SpecialNoteSeeder::class,
+    ]);
+  }
 }
