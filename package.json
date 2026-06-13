@@ -1,0 +1,21 @@
+{
+  "name": "grocery-training-project",
+  "version": "1.0.0",
+  "description": "A comprehensive Laravel-based RESTful API backend for a modern grocery and meal delivery mobile application. This API provides complete e-commerce functionality including user authentication, product management, shopping cart, favorites, AI-powered chatbot, payment processing, and delivery address management.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abanoubtalaatr/grocery-training-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abanoubtalaatr/grocery-training-project/issues"
+  },
+  "homepage": "https://github.com/abanoubtalaatr/grocery-training-project#readme"
+}
