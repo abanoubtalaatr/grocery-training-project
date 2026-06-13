@@ -42,6 +42,9 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 |
 */
 
+Route::prefix('v1')->group(function () {
+    Route::get('/meals', [ApiMealController::class, 'index']);
+});
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
