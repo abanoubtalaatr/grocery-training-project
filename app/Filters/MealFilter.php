@@ -11,8 +11,15 @@ class MealFilter extends QueryFilter
         $this->builder->where('category_id', $value);
     }
 
+    public function subcategory_id($value)
+    {
+        $this->builder->where('subcategory_id', $value);
+    }
+
     public function is_available($value)
     {
         $this->builder->where('is_available', $value);
     }
+
+    
 }
