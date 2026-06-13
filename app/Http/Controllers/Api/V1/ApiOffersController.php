@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Offer;
 use Illuminate\Http\Request;
 
-class OffersController extends Controller
+class ApiOffersController extends Controller
 {
   public function index(Request $request)
   {
