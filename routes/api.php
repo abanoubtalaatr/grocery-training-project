@@ -31,6 +31,8 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Http\Controllers\Api\V1\CategoriesController as ApiCategoriesController;
+use App\Http\Controllers\Api\V1\ReviewsController as ApiReviewsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,6 +46,8 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+    Route::get('/categories', [ApiCategoriesController::class, 'index']);
+    Route::get('/reviews', [ApiReviewsController::class, 'index']);
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
