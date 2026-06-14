@@ -19,7 +19,7 @@ abstract class QueryFilter
     {
         $this->builder = $builder;
         foreach ($this->filterableParameters() as $name => $value) {
-            $this->{$name}($value);
+            $this->{$name}($value); // category_id(5)
         }
         return $this->builder;
     }
@@ -27,9 +27,9 @@ abstract class QueryFilter
     
     protected function filterableParameters(): array
     {
-        return collect($this->request->keys())
+        return collect($this->request->keys()) // category_id , is_available
             ->filter(fn(string $key) => method_exists($this, $key))
-            ->mapWithKeys(fn(string $key) => [$key => $this->request->input($key)])
+            ->mapWithKeys(fn(string $key) => [$key => $this->request->input($key)]) //'category_id' => 2
             ->all();
     }
 }
