@@ -34,3 +34,43 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+// مسار تجريبي تعليمي لتجربة نظام الطوابير (Queue) وتتابع المهام (Jobs Chain)
+Route::get('/test-welcome-chain', function () {
+    // 1. إنشاء مستخدم تجريبي أو جلبه إذا كان موجوداً مسبقاً
+    $user = \App\Models\User::firstOrCreate(
+        ['email' => 'student@example.com'],
+        [
+            'username' => 'student_learner_' . time(),
+            'firstname' => 'أحمد',
+            'lastname' => 'التعليمي',
+            'password' => bcrypt('password123'),
+            'email_verified' => true,
+            'agree_terms' => true,
+        ]
+    );
+
+    // 2. تشغيل المهام بتسلسل متتالي (Chaining) باستخدام Bus::chain
+    // هذا يعني أن GenerateWelcomePdfJob ستعمل أولاً، وعند نجاحها ستعمل SendWelcomeEmailJob مباشرة
+    \Illuminate\Support\Facades\Bus::chain([
+        new \App\Jobs\GenerateWelcomePdfJob($user),
+        new \App\Jobs\SendWelcomeEmailJob($user),
+    ])->dispatch();
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'تمت إضافة الـ Jobs إلى الـ Queue بنجاح بنظام التسلسل (Chain)!',
+        'user' => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+        ],
+        'next_steps' => [
+            '1' => 'قم بفتح جدول jobs في قاعدة البيانات للتأكد من تخزين الـ Job الأولى فيه.',
+            '2' => 'قم بتشغيل الأمر: php artisan queue:work لتنفيذ الـ Jobs.',
+            '3' => 'تأكد من إنشاء ملف الـ PDF في المجلد: storage/app/public.',
+            '4' => 'تأكد من ظهور الإيميل الترحيبي مع المرفق داخل الملف: storage/logs/laravel.log.'
+        ]
+    ]);
+});
+

@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Jobs\GenerateWelcomePdfJob;
+use App\Jobs\SendWelcomeEmailJob;
 use App\Models\User;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -19,7 +22,6 @@ class AuthService
     public function register(array $data): array
     {
 
-        // Create user
         $user = User::create([
             'username' => $data['username'],
             'email' => $data['email'] ?? null,
@@ -28,12 +30,13 @@ class AuthService
             'agree_terms' => $data['agree_terms'],
         ]);
 
-        // Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Send welcome notification
         if ($user->email) {
-            $this->notificationService->sendWelcomeEmail($user->email, $user->username);
+            Bus::chain([
+                new GenerateWelcomePdfJob($user),
+                new SendWelcomeEmailJob($user),
+            ])->dispatch();
         }
 
         return [
