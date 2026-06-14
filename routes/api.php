@@ -256,4 +256,8 @@ Route::post("/reviews/{id}", [\App\Http\Controllers\Api\ReviewController::class,
 Route::post("/reviews_Search", [\App\Http\Controllers\Api\ReviewController::class, 'Search'])->name('reviews.search');
 Route::apiResource('meals', MealController::class); 
 
-// الـ apiResource أوتوماتيك بتسمي روت العرض المفرده باسم meals.show
+
+use App\Jobs\SendEmail;
+
+// روت للتجربة السريعة بيعمل dispatch للـ Job فوراً
+Route::middleware('auth:sanctum')->post('/send-invoice', [App\Http\Controllers\SendInvoiceController::class, 'sendInvoice']);
