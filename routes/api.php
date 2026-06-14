@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\StripeCheckoutController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
+use App\Jobs\SendInvoice;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 /*
@@ -44,6 +45,14 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+
+    Route::get('send-invoice', function () {
+        SendInvoice::dispatch();
+        
+        return response()->json([
+            'message' => 'Invoice email has been sent.',
+        ]);
+    });
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
