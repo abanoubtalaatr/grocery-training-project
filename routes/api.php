@@ -32,7 +32,10 @@ use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
+use App\Jobs\SendToInventoryJob;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -43,6 +46,13 @@ use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::get('email-send',function(){
+  SendToInventoryJob::dispatch()->delay(now()->addSeconds(10));
+  return response()->json(['message'=>"Email send"]);
+});
+
+Route::get('send-invoice',[InvoiceController::class, 'send']);
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
