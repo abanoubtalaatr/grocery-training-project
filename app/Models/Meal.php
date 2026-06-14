@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use App\Traits\Filterable;
 
 class Meal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes,Filterable;
 
     /**
      * The attributes that are mass assignable.
@@ -156,7 +158,7 @@ class Meal extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return null;
         }
 
@@ -166,7 +168,7 @@ class Meal extends Model
         }
 
         // Otherwise, generate URL from storage
-        return asset('storage/' . $this->image);
+        return asset('storage/'.$this->image);
     }
 
     /**
@@ -174,7 +176,7 @@ class Meal extends Model
      */
     public function hasOffer(): bool
     {
-        return !empty($this->offer_title) || $this->getRawDiscountPrice() !== null;
+        return ! empty($this->offer_title) || $this->getRawDiscountPrice() !== null;
     }
 
     /**
@@ -183,6 +185,7 @@ class Meal extends Model
     public function getRawDiscountPrice(): ?float
     {
         $value = $this->attributes['discount_price'] ?? null;
+
         return $value !== null ? (float) $value : null;
     }
 
@@ -199,9 +202,11 @@ class Meal extends Model
             $percent = (int) $m[1];
             if ($percent > 0 && $percent < 100) {
                 $price = (float) $this->price;
+
                 return round($price * (1 - $percent / 100), 2);
             }
         }
+
         return null;
     }
 
@@ -215,6 +220,7 @@ class Meal extends Model
         if ($stored !== null) {
             return $stored;
         }
+
         return $this->calculateDiscountPriceFromOfferTitle();
     }
 
@@ -224,6 +230,7 @@ class Meal extends Model
     public function getFinalPriceAttribute(): float
     {
         $discount = $this->resolved_discount_price;
+
         return $discount !== null ? $discount : (float) $this->price;
     }
 
@@ -252,9 +259,10 @@ class Meal extends Model
      */
     public function isExpired(): bool
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return false;
         }
+
         return Carbon::parse($this->expiry_date)->isPast();
     }
 
@@ -263,9 +271,10 @@ class Meal extends Model
      */
     public function daysUntilExpiry(): ?int
     {
-        if (!$this->expiry_date) {
+        if (! $this->expiry_date) {
             return null;
         }
+
         return Carbon::now()->diffInDays(Carbon::parse($this->expiry_date), false);
     }
 
@@ -293,13 +302,13 @@ class Meal extends Model
         parent::boot();
 
         static::creating(function ($meal) {
-            if (!$meal->slug) {
+            if (! $meal->slug) {
                 $meal->slug = Str::slug($meal->title);
             }
         });
 
         static::updating(function ($meal) {
-            if ($meal->isDirty('title') && !$meal->isDirty('slug')) {
+            if ($meal->isDirty('title') && ! $meal->isDirty('slug')) {
                 $meal->slug = Str::slug($meal->title);
             }
         });

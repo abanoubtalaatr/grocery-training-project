@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use app\Traits\Filterable;
 
 class Subcategory extends Model
 {
-    use HasFactory;
+    use HasFactory , Filterable;
 
     protected $fillable = [
         'category_id',
