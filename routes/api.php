@@ -33,6 +33,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
+use App\Jobs\GenerateInvoicePdfJob;
+use  App\Http\Controllers\Api\InvoiceController as ApiInvoiceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -43,6 +45,15 @@ use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/send-email/{invoice}', function ($invoiceId) {
+    GenerateInvoicePdfJob::dispatch($invoiceId);
+
+    return response()->json([
+        'message' => 'Job queued'
+    ]);
+});
+Route::post('/send-invoice', [ApiInvoiceController::class, 'send']);
+
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
