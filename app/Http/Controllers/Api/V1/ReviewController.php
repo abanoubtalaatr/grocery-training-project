@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Meal;
+use App\Models\Review;
 
-class MealController extends Controller
+class ReviewController extends Controller
 {
-    public function index(Request $request)
+    public function reviews(Request $request)
     {
-        $meals = Meal::query()
+        $reviews = Review::query()
             ->filter($request)
             ->paginate(5);
 
-        return response()->json($meals);
+        return response()->json($reviews);
     }
 }

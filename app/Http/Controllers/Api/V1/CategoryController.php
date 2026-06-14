@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Meal;
+use App\Models\Category;
 
-class MealController extends Controller
+class CategoryController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $meals = Meal::query()
+        $categories = Category::query()
             ->filter($request)
             ->paginate(5);
 
-        return response()->json($meals);
+        return response()->json($categories);
     }
 }
