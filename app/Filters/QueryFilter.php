@@ -23,7 +23,6 @@ abstract class QueryFilter
         }
         return $this->builder;
     }
-
     
     protected function filterableParameters(): array
     {
