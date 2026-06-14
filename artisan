@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+
 define('LARAVEL_START', microtime(true));
 
 /*
@@ -16,6 +17,16 @@ define('LARAVEL_START', microtime(true));
 */
 
 require __DIR__.'/vendor/autoload.php';
+
+require __DIR__.'/app/Providers/SentinelServiceProvider.php';
+spl_autoload_register(function ($class) {
+    if (strpos($class, 'Laravel\\Telescope\\') === 0) {
+        $path = __DIR__.'/vendor/laravel/telescope/src/'.str_replace('\\', '/', substr($class, 18)).'.php';
+        if (file_exists($path)) {
+            require $path;
+        }
+    }
+});
 
 $app = require_once __DIR__.'/bootstrap/app.php';
 

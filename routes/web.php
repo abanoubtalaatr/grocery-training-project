@@ -34,3 +34,17 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+Route::get('/failed-jobs', function () {
+    if (config('queue.default') !== 'database') {
+        abort(403, 'This dashboard is only available when using the database queue driver.');
+    }
+
+    try {
+        $failedJobs = \Illuminate\Support\Facades\DB::table('failed_jobs')->orderByDesc('failed_at')->get();
+    } catch (\Exception $e) {
+        $failedJobs = collect(); // Fallback if table doesn't exist
+    }
+
+    return view('failed-jobs', compact('failedJobs'));
+});

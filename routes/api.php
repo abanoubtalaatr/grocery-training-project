@@ -31,6 +31,8 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Jobs\SendToInventoryJobs;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,6 +43,46 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/send-email', function () {
+    SendToInventoryJobs::dispatch();
+    return response()->json(['message' => 'Email Sent Successfully']);
+});
+
+Route::post('/test-job', function () {
+    $order = [
+        'id' => rand(1000, 9999),
+        'customer_name' => 'Postman User',
+        'customer_email' => 'postman@example.com',
+        'items' => [
+            ['name' => 'Test Item', 'quantity' => 1, 'price' => 10.00],
+        ],
+        'total_price' => 10.00,
+        'simulate_failure' => false,
+    ];
+
+    \App\Jobs\SendInvoiceEmailJob::dispatch($order);
+
+    return response()->json(['message' => 'Job dispatched successfully. It will succeed.']);
+});
+
+Route::post('/test-job-fail', function () {
+    $order = [
+        'id' => rand(1000, 9999),
+        'customer_name' => 'Failing User',
+        'customer_email' => 'fail@example.com',
+        'items' => [
+            ['name' => 'Failed Item', 'quantity' => 1, 'price' => 0.00],
+        ],
+        'total_price' => 0.00,
+        'simulate_failure' => true, // This flag causes the job to fail
+    ];
+
+    \App\Jobs\SendInvoiceEmailJob::dispatch($order);
+
+    return response()->json(['message' => 'Failing Job dispatched successfully. It will throw an exception!']);
+});
+
+
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
