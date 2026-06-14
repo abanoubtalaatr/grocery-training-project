@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DataManagementController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\Invoice\InvoiceController;
+use App\Http\Controllers\Api\Jobs\FailedJobController;
 use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\MealController;
 use App\Http\Controllers\Api\NotificationController;
@@ -43,6 +44,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::resource('/failed-jobs', FailedJobController::class);
 
 Route::post('/send-invoice', [InvoiceController::class, 'send']);
 
