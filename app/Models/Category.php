@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-
+use App\Filters\CategoryFilter;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 class Category extends Model
 {
     use HasFactory, SoftDeletes;
@@ -61,7 +63,6 @@ class Category extends Model
     {
         return $query->where('is_active', true);
     }
-
     /**
      * Scope a query to order by sort order.
      */
@@ -69,7 +70,11 @@ class Category extends Model
     {
         return $query->orderBy('sort_order', 'asc')->orderBy('name', 'asc');
     }
-
+    public function scopeSearch(Builder $builder, Request $request)
+     {
+      $filter = new CategoryFilter($request);
+      return $filter->apply($builder);  
+     }
     /**
      * Get the image URL attribute.
      */

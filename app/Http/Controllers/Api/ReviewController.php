@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
-use App\Http\Resources\ReviewResource;
 use App\Models\Review;
 use App\Models\Meal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Gate;
+use App\Filters\ReviewFilter;
+use App\Http\Resources\Api\ReviewResource;
 class ReviewController extends Controller
 {
     /**
@@ -239,6 +240,15 @@ class ReviewController extends Controller
                     'one_star' => (int) $stats->one_star,
                 ]
             ]
+        ]);
+    }
+    public function Search(Request $request): JsonResponse
+    {
+        
+        $reviews = Review::approved()->search($request)->get();        
+        return response()->json([
+            'success' => true,
+            'data' => ReviewResource::collection($reviews)
         ]);
     }
 }

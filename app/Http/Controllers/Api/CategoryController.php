@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Filters\CategoryFilter;
 
 class CategoryController extends Controller
 {
@@ -218,6 +219,36 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve meals',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function Search(Request $request): JsonResponse
+    {
+        try {
+            $categories = Category::search($request)
+                ->active()
+                ->ordered() 
+                ->withCount('meals')
+                ->get();
+                
+               
+            return response()->json([
+                'success' => true,
+                'message' => 'Categories retrieved successfully',
+                'data' => $categories,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve categories',
+                'error' => $e->getMessage(),
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve categories',
                 'error' => $e->getMessage(),
             ], 500);
         }
