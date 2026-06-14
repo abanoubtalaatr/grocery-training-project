@@ -31,6 +31,10 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
+use App\Jobs\SendInventoryJob;
+use App\Jobs\SendInvoiceJob;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,9 +45,35 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/send-email', function () {
+SendInventoryJob::dispatch()->delay(now()->addSeconds(5)); 
+return response()->json(['message' => 'Inventory update job dispatched']);
+});
+
+// Send invoice email endpoint
+Route::post('/send-invoice', function () {
+    $orderId = request('order_id', 1);
+    $orderNumber = request('order_number', 'ORD-2024-001');
+    $customerName = request('customer_name', 'John Doe');
+    $customerEmail = request('customer_email', 'customer@example.com');
+    $total = request('total', 99.99);
+    $items = request('items', []);
+
+    SendInvoiceJob::dispatch($orderId, $orderNumber, $customerName, $customerEmail, $total, $items)
+        ->delay(now()->addSeconds(5));
+
+    return response()->json([
+        'message' => 'Invoice email job dispatched',
+        'order_id' => $orderId,
+        'order_number' => $orderNumber,
+        'customer_email' => $customerEmail,
+        'total'=>$total,
+    ]);
+});
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+    Route::get('/categories', [ApiCategoryController::class, 'index']);
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);

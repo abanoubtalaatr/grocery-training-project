@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Concerns\Filterable;
 
     /** Fallback when no image is stored (API always exposes a usable URL). */
     public const DEFAULT_IMAGE_URL = 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400';

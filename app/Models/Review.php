@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Review extends Model
 {
-    use HasFactory;
+    use HasFactory , Concerns\Filterable;
 
     protected $fillable = [
         'user_id',
