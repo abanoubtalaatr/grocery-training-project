@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateStripeCheckoutSessionRequest;
+use App\Jobs\SendInvoiceEmailJob;
 use App\Models\Order;
 use App\Services\StripeCheckoutService;
 use Illuminate\Http\JsonResponse;
@@ -59,10 +60,10 @@ class StripeCheckoutController extends Controller
             $pi = $session->payment_intent;
             $paymentIntentId = is_string($pi) ? $pi : ($pi->id ?? null);
 
-            DB::transaction(function () use ($order, $paymentIntentId, $session) {
+            $invoiceShouldBeSent = DB::transaction(function () use ($order, $paymentIntentId, $session) {
                 $order->refresh();
                 if ($order->status !== 'awaiting_payment') {
-                    return;
+                    return false;
                 }
 
                 $order->update([
@@ -71,9 +72,15 @@ class StripeCheckoutController extends Controller
                     'stripe_payment_intent_id' => $paymentIntentId,
                     'stripe_checkout_session_id' => $session->id,
                 ]);
+
+                return true;
             });
 
             $order->refresh();
+
+            if ($invoiceShouldBeSent) {
+                SendInvoiceEmailJob::dispatch($order->id)->onQueue('emails');
+            }
         }
 
         return response()->json([
