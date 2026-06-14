@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
-use App\Http\Controllers\Api\MailController;
+use App\Http\Controllers\Api\V1\MailController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -51,7 +51,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/reviews',[ApiReviewController::class,'index']);
 });
 
-Route::post('/send-mail', [MailController::class, 'send']);
+Route::get('/send-invoice', [MailController::class, 'send']);
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
