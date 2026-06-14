@@ -106,3 +106,9 @@ class Category extends Model
         });
     }
 }
+use App\Models\Concerns\Filterable;
+
+class Category extends Model
+{
+    use Filterable;
+}

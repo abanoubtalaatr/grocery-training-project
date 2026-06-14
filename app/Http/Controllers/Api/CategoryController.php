@@ -223,3 +223,8 @@ class CategoryController extends Controller
         }
     }
 }
+public function index(Request $request)
+{
+    $categories = Category::filter($request)->get();
+    return response()->json($categories);
+}
