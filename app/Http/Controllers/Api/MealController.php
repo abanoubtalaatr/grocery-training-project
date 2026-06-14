@@ -292,6 +292,8 @@ class MealController extends Controller
         try {
             $user = $request->user();
             $query = Meal::with(['category', 'subcategory'])->available();
+            $query = $query->filter($request);
+            
 
             // SEARCH by title or description
             if ($request->has('search') && $request->filled('search')) {
