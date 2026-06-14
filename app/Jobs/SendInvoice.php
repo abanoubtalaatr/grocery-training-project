@@ -36,6 +36,6 @@ class SendInvoice implements ShouldQueue
         $mpdf->WriteHTML($html);
         $pdfContent = $mpdf->Output('', 'S');
 
-        Mail::to('test@app.com')->send(new \App\Mail\SendInvoice($pdfContent));
+        Mail::to('test@app.com')->send(new \App\Mail\Invoice($pdfContent));
     }
 }
