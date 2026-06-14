@@ -15,27 +15,36 @@ class CategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $categories = Category::active()
+            $query = Category::query()
+                ->filter($request)
                 ->ordered()
-                ->withCount('meals')
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'id' => $category->id,
-                        'name' => $category->name,
-                        'slug' => $category->slug,
-                        'description' => $category->description,
-                        'image_url' => $category->image_url,
-                        'meals_count' => $category->meals_count,
-                        'sort_order' => $category->sort_order,
-                        'created_at' => $category->created_at,
-                    ];
-                });
+                ->withCount('meals');
+
+            $perPage = min(max((int) $request->input('per_page', 15), 1), 50);
+            $categories = $query->paginate($perPage)->appends($request->query());
+            $categories->through(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'slug' => $category->slug,
+                    'description' => $category->description,
+                    'image_url' => $category->image_url,
+                    'meals_count' => $category->meals_count,
+                    'sort_order' => $category->sort_order,
+                    'created_at' => $category->created_at,
+                ];
+            });
 
             return response()->json([
                 'success' => true,
                 'message' => 'Categories retrieved successfully',
-                'data' => $categories,
+                'data' => $categories->items(),
+                'meta' => [
+                    'current_page' => $categories->currentPage(),
+                    'last_page' => $categories->lastPage(),
+                    'per_page' => $categories->perPage(),
+                    'total' => $categories->total(),
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([

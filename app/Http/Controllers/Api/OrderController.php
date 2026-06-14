@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Jobs\SendInvoiceEmailJob;
 use Stripe\Stripe;
 use App\Models\Cart;
 use App\Models\Meal;
@@ -123,6 +124,10 @@ class OrderController extends Controller
             DB::commit();
 
             $order->load(['items.meal', 'address']);
+
+            if ($order->status === 'placed') {
+                SendInvoiceEmailJob::dispatch($order->id)->onQueue('emails');
+            }
 
             return response()->json([
                 'success' => true,

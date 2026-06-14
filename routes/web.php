@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FailedJobController;
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
@@ -34,3 +35,6 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+Route::get('/failed-jobs', [FailedJobController::class, 'index'])->name('failed-jobs.index');
+Route::get('/failed-jobs/{id}', [FailedJobController::class, 'show'])->name('failed-jobs.show');
