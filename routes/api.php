@@ -19,7 +19,7 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\SendInvocController;
+use App\Http\Controllers\Api\V1\SendInvocController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SmartListController;
 use App\Http\Controllers\Api\SpecialNoteController;
@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\UserAppSettingsController;
+use App\Http\Controllers\Api\V1\FailedJobController;
 use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
@@ -58,6 +59,10 @@ Route::prefix('v1')->group(function () {
 //----------- JOBS ------------//
 
 Route::get('/send-invoice', [SendInvocController::class ,'send']);
+
+
+
+Route::get('/failed-jobs', [FailedJobController::class, 'index']);
 
 ///////////////////////////////////////////
 

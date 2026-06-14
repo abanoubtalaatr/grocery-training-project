@@ -15,7 +15,7 @@ class SendEmailJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-   protected $email;
+    protected $email;
     protected $invoiceData;
 
     public function __construct($email, $invoiceData)
