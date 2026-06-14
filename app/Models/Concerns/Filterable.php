@@ -1,0 +1,21 @@
+<?php 
+
+namespace App\Models\Concerns;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+
+trait Filterable
+{
+    /// new App\Filters\MealFilter($request)->apply($query);
+    public function scopeFilter(Builder $query, Request $request): Builder
+    {
+        $static = self::resolveFilterClass();
+        return (new $static($request))->apply($query);
+    }
+
+    public static function resolveFilterClass(): string
+    {
+        return 'App\\Filters\\'.class_basename(self::class).'Filter';
+    }
+}
