@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
 Route::get('/', function () {
@@ -26,8 +21,8 @@ Route::get('/', function () {
 
 Route::prefix('chat')->group(function () {
     Route::get('/', [WebChatController::class, 'index'])->name('chat');
-    Route::post('/send', [WebChatController::class, 'send'])->name('chat.send');
-    Route::post('/reset', [WebChatController::class, 'reset'])->name('chat.reset');
+    Route::post('/', [WebChatController::class, 'store'])->name('chat.send');
+    Route::delete('/', [WebChatController::class, 'destroy'])->name('chat.reset');
 });
 
 Route::prefix('payment')->group(function () {

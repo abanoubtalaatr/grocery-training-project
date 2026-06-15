@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\ProfileService;
-use App\Http\Requests\UpdateProfileImageRequest;
 use App\Http\Requests\UpdateProfileInfoRequest;
 use App\Traits\V1\ApiResponse;
 use App\Traits\V1\ApiResponseCollection;
@@ -23,7 +22,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Get full user profile.
+     * Display the authenticated user's profile.
      */
     public function show(Request $request): JsonResponse
     {
@@ -32,19 +31,9 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update profile image
+     * Update the authenticated user's profile information.
      */
-    public function updateImage(UpdateProfileImageRequest $request): JsonResponse
-    {
-        $data = $this->profileService->updateProfileImage($request->user(), $request->file('image'));
-
-        return self::successResponse('Profile image updated successfully', $data);
-    }
-
-    /**
-     * Update profile information
-     */
-    public function updateInfo(UpdateProfileInfoRequest $request): JsonResponse
+    public function update(UpdateProfileInfoRequest $request): JsonResponse
     {
         $user = $this->profileService->updateProfileInfo($request->user(), $request->validated());
 
@@ -63,49 +52,5 @@ class ProfileController extends Controller
             'profile_image_url' => $user->profile_image_url,
             'updated_at' => $user->updated_at,
         ]);
-    }
-
-    /**
-     * Delete profile image
-     */
-    public function deleteImage(Request $request): JsonResponse
-    {
-        $success = $this->profileService->deleteProfileImage($request->user());
-
-        if (!$success) {
-            return self::errorResponse('No profile image to delete', null, 404);
-        }
-
-        return self::successResponse('Profile image deleted successfully');
-    }
-
-    /**
-     * List active sessions/devices.
-     */
-    public function sessions(Request $request): JsonResponse
-    {
-        $tokens = $this->profileService->getActiveSessions($request->user());
-        return self::collectionResponse('Sessions retrieved successfully', $tokens);
-    }
-
-    /**
-     * Revoke a session/device.
-     */
-    public function destroySession(Request $request, string $tokenId): JsonResponse
-    {
-        $user = $request->user();
-        $currentTokenId = $user->currentAccessToken()?->id;
-
-        if ((string) $tokenId === (string) $currentTokenId) {
-            return self::errorResponse('Cannot revoke your current session from this request. Use logout instead.', null, 400);
-        }
-
-        $success = $this->profileService->revokeSession($user, $tokenId);
-
-        if (!$success) {
-            return self::errorResponse('Session not found', null, 404);
-        }
-
-        return self::successResponse('Session revoked successfully');
     }
 }

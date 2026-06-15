@@ -2,47 +2,49 @@
 
 namespace App\Services;
 
-use App\Models\Category;
+use App\Models\Subcategory;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class CategoryService
+class SubcategoryService
 {
-    public function getCategories(): Collection
+    public function getSubcategories(array $filters): Collection
     {
-        return Category::active()
-            ->ordered()
-            ->withCount('meals')
-            ->get();
+        $query = Subcategory::with('category')->active();
+
+        if (isset($filters['category_id'])) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        return $query->inRandomOrder()->get();
     }
 
-    public function formatCategory(Category $category): array
+    public function formatSubcategory(Subcategory $subcategory): array
     {
         return [
-            'id' => $category->id,
-            'name' => $category->name,
-            'slug' => $category->slug,
-            'description' => $category->description,
-            'image_url' => $category->image_url,
-            'sort_order' => $category->sort_order,
-            'meals_count' => $category->meals_count ?? $category->meals()->count(),
-            'created_at' => $category->created_at,
-            'updated_at' => $category->updated_at,
+            'id' => $subcategory->id,
+            'name' => $subcategory->name,
+            'slug' => $subcategory->slug,
+            'description' => $subcategory->description,
+            'image_url' => $subcategory->image_url,
+            'order' => $subcategory->order,
+            'category' => $subcategory->category ? [
+                'id' => $subcategory->category->id,
+                'name' => $subcategory->category->name,
+            ] : null,
+            'meals_count' => $subcategory->meals()->available()->count(),
+            'created_at' => $subcategory->created_at,
         ];
     }
 
-    public function getCategoryMeals(Category $category, array $filters, int $perPage = 15): LengthAwarePaginator
+    public function getSubcategoryMeals(Subcategory $subcategory, array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        $query = $category->meals()->with(['subcategory', 'category'])->available();
+        $query = $subcategory->meals()->with('category')->available();
 
         if (isset($filters['featured'])) {
             filter_var($filters['featured'], FILTER_VALIDATE_BOOLEAN) 
                 ? $query->featured() 
                 : $query->where('is_featured', false);
-        }
-
-        if (isset($filters['subcategory_id'])) {
-            $query->where('subcategory_id', $filters['subcategory_id']);
         }
 
         if (isset($filters['in_stock'])) {

@@ -22,9 +22,9 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get payment history for the authenticated user.
+     * Display a listing of payments (history).
      */
-    public function paymentHistory(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $orders = $this->paymentService->getPaymentHistory($request->user());
         $paymentHistory = $this->paymentService->formatPaymentHistory($orders);
@@ -33,9 +33,9 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get receipt/invoice for a specific order.
+     * Display the specified receipt/invoice.
      */
-    public function receipt(Request $request, Order $order): JsonResponse
+    public function show(Request $request, Order $order): JsonResponse
     {
         // Verify order belongs to user
         if ($order->user_id !== $request->user()->id) {
@@ -46,13 +46,5 @@ class PaymentController extends Controller
         $receipt = $this->paymentService->formatReceipt($order);
 
         return self::successResponse('Receipt retrieved successfully', $receipt);
-    }
-
-    /**
-     * Get invoice for a specific order (alias for receipt).
-     */
-    public function invoice(Request $request, Order $order): JsonResponse
-    {
-        return $this->receipt($request, $order);
     }
 }
