@@ -6,43 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\CategoryService;
+use App\Traits\V1\ApiResponse;
+
 
 class CategoryController extends Controller
 {
+  use ApiResponse;
     /**
      * Get all categories
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, CategoryService $categoryService): JsonResponse
     {
         try {
-            $categories = Category::active()
-                ->ordered()
-                ->withCount('meals')
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'id' => $category->id,
-                        'name' => $category->name,
-                        'slug' => $category->slug,
-                        'description' => $category->description,
-                        'image_url' => $category->image_url,
-                        'meals_count' => $category->meals_count,
-                        'sort_order' => $category->sort_order,
-                        'created_at' => $category->created_at,
-                    ];
-                });
+            $categories = $categoryService->getCategories();
+          
+            return $this->successResponse('Categories retrieved successfully', $categories, 200);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Categories retrieved successfully',
-                'data' => $categories,
-            ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve categories',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Failed to retrieve categories', $e->getMessage(), 500);
         }
     }
 
