@@ -11,15 +11,17 @@ use App\Actions\Order\CreateOrderAction;
 use App\Actions\Order\GetOrdersAction;
 use App\Actions\Order\TrackOrderAction;
 use App\Http\Resources\OrderResource;
+use App\Traits\ApiResponse;
 
 class OrderController extends Controller
 {
+    use ApiResponse;
 
     public function show(Request $request, Order $order)
     {
         $order = $order->load(['items.meal', 'address']);
 
-        return response()->json(['success' => true, 'message' => 'Order retrieved successfully', 'data' => new OrderResource($order)]);
+        return $this->success('Order retrieved successfully', new OrderResource($order));
     }
     
     /**
@@ -31,7 +33,7 @@ class OrderController extends Controller
 
         $order->load(['items.meal', 'address']);
 
-        return response()->json(['success' => true, 'message' => 'Order created successfully', 'data' => new OrderResource($order)], 201);
+        return $this->created('Order created successfully', new OrderResource($order));
     }
 
     /**

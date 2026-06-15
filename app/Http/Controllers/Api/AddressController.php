@@ -14,31 +14,24 @@ use App\Http\Resources\AddressResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\ApiResponse;
 
 class AddressController extends Controller
 {
+    use ApiResponse;
     /**
      * Get all user addresses
      */
     public function index(Request $request): JsonResponse
     {
         if ($request->allFiles() !== []) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This endpoint does not accept file uploads.',
-                'errors' => ['files' => ['Remove file attachments from the request.']],
-            ], 422);
+            return $this->error('This endpoint does not accept file uploads.', ['files' => ['Remove file attachments from the request.']], 422);
         }
         $user = $request->user();
 
         $addresses = $user->addresses()->orderBy('is_default', 'desc')->orderBy('created_at', 'desc')->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Addresses retrieved successfully',
-            'data' => AddressResource::collection($addresses),
-            'total_count' => $addresses->count(),
-        ]);
+        return $this->success('Addresses retrieved successfully', AddressResource::collection($addresses), 200, ['total_count' => $addresses->count()]);
     }
 
     /**
@@ -49,7 +42,7 @@ class AddressController extends Controller
         $user = $request->user();
         $address = $user->addresses()->findOrFail($id);
 
-        return response()->json(['success' => true, 'message' => 'Address retrieved successfully', 'data' => new AddressResource($address)]);
+        return $this->success('Address retrieved successfully', new AddressResource($address));
     }
 
     /**
@@ -63,7 +56,7 @@ class AddressController extends Controller
 
         $address = $action->execute($user, $data);
 
-        return response()->json(['success' => true, 'message' => 'Address created successfully', 'data' => new AddressResource($address)], 201);
+        return $this->created('Address created successfully', new AddressResource($address));
     }
 
     /**
@@ -78,7 +71,7 @@ class AddressController extends Controller
 
         $address = $action->execute($user, $address, $updateData);
 
-        return response()->json(['success' => true, 'message' => 'Address updated successfully', 'data' => new AddressResource($address)]);
+        return $this->success('Address updated successfully', new AddressResource($address));
     }
 
     /**
@@ -91,7 +84,7 @@ class AddressController extends Controller
 
         $action->execute($user, $address);
 
-        return response()->json(['success' => true, 'message' => 'Address deleted successfully']);
+        return $this->success('Address deleted successfully');
     }
 
     /**
@@ -103,12 +96,12 @@ class AddressController extends Controller
         $address = $user->addresses()->findOrFail($id);
 
         if ($address->is_default) {
-            return response()->json(['success' => true, 'message' => 'This address is already your default.', 'already_default' => true, 'data' => new AddressResource($address)]);
+            return $this->success('This address is already your default.', new AddressResource($address), 200, ['already_default' => true]);
         }
 
         $address = $action->execute($user, $address);
 
-        return response()->json(['success' => true, 'message' => 'Default address updated successfully', 'data' => new AddressResource($address)]);
+        return $this->success('Default address updated successfully', new AddressResource($address));
     }
 
     /**

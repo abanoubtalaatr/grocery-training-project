@@ -19,9 +19,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Traits\ApiResponse;
 
 class CartController extends Controller
 {
+    use ApiResponse;
     /**
      * Get user's cart
      */
@@ -32,7 +34,7 @@ class CartController extends Controller
 
         $result = (new GetCartAction())->execute($user, $deliveryType);
 
-        return response()->json(['success' => true, 'message' => 'Cart retrieved successfully', 'data' => new CartResource($result['cart'])]);
+        return $this->success('Cart retrieved successfully', new CartResource($result['cart']));
     }
 
     /**
@@ -46,7 +48,7 @@ class CartController extends Controller
 
         $cart = (new AddCartItemAction())->execute($user, $validated['meal_id'], $validated['quantity']);
 
-        return response()->json(['success' => true, 'message' => 'Item added to cart successfully', 'data' => new CartResource($cart)]);
+        return $this->success('Item added to cart successfully', new CartResource($cart));
     }
 
     /**
@@ -60,7 +62,7 @@ class CartController extends Controller
 
         $cart = (new UpdateCartItemAction())->execute($user, $itemId, $validated['quantity']);
 
-        return response()->json(['success' => true, 'message' => 'Cart item updated successfully', 'data' => new CartResource($cart)]);
+        return $this->success('Cart item updated successfully', new CartResource($cart));
     }
 
     /**
@@ -72,7 +74,7 @@ class CartController extends Controller
 
         $cart = (new RemoveCartItemAction())->execute($user, $itemId);
 
-        return response()->json(['success' => true, 'message' => 'Item removed from cart successfully', 'data' => new CartResource($cart)]);
+        return $this->success('Item removed from cart successfully', new CartResource($cart));
     }
 
     /**
@@ -84,7 +86,7 @@ class CartController extends Controller
 
         $cart = (new ClearCartAction())->execute($user);
 
-        return response()->json(['success' => true, 'message' => 'Cart cleared successfully', 'data' => new CartResource($cart)]);
+        return $this->success('Cart cleared successfully', new CartResource($cart));
     }
 
     /**
