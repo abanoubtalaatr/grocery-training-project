@@ -6,35 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UpdateNotificationCategoryRequest;
 use App\Http\Requests\Api\UpdateNotificationSettingsRequest;
 use App\Models\UserNotificationSetting;
+use App\Traits\V1\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationSettingsController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get user notification settings
      */
-    public function index()
+    public function index(): JsonResponse
     {
         try {
             $user = Auth::user();
             $settings = $user->initializeNotificationSettings();
 
-            return response()->json([
-                'success' => true,
-                'data' => $settings ? $this->formatSettings($settings) : $this->defaultSettingsStructure(),
-            ]);
+            return self::successResponse(
+                'Notification settings retrieved successfully',
+                $settings ? $this->formatSettings($settings) : $this->defaultSettingsStructure()
+            );
         } catch (\Throwable $e) {
-            return response()->json([
-                'success' => true,
-                'data' => $this->defaultSettingsStructure(),
-            ]);
+            return self::successResponse(
+                'Notification settings retrieved (default)',
+                $this->defaultSettingsStructure()
+            );
         }
     }
 
     /**
      * Update notification settings.
-     * Only accepts true, false, 0, or 1 for each setting; invalid values (e.g. 4) return 422.
      */
     public function update(UpdateNotificationSettingsRequest $request): JsonResponse
     {
@@ -44,16 +46,14 @@ class NotificationSettingsController extends Controller
         $settings = $user->initializeNotificationSettings();
         $settings->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification settings updated successfully',
-            'data' => $this->formatSettings($settings->fresh()),
-        ]);
+        return self::successResponse(
+            'Notification settings updated successfully',
+            $this->formatSettings($settings->fresh())
+        );
     }
 
     /**
      * Update specific category settings.
-     * Only accepts true, false, 0, or 1 for enabled; invalid values return 422.
      */
     public function updateCategory(UpdateNotificationCategoryRequest $request, string $category): JsonResponse
     {
@@ -65,10 +65,7 @@ class NotificationSettingsController extends Controller
         $fields = $this->getCategoryFields($category);
 
         if (empty($fields)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid category',
-            ], 400);
+            return self::errorResponse('Invalid category', null, 400);
         }
 
         $updateData = [];
@@ -78,11 +75,10 @@ class NotificationSettingsController extends Controller
 
         $settings->update($updateData);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification settings updated successfully',
-            'data' => $this->formatSettings($settings->fresh()),
-        ]);
+        return self::successResponse(
+            'Notification category settings updated successfully',
+            $this->formatSettings($settings->fresh())
+        );
     }
 
     /**

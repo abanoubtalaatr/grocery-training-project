@@ -6,11 +6,16 @@ use App\Models\Offer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\OfferResource;
+use App\Traits\V1\ApiResponse;
+use App\Traits\V1\ApiResponseCollection;
+use Illuminate\Http\JsonResponse;
 
 class OfferController extends Controller
 {
+    use ApiResponse, ApiResponseCollection;
+
     // Get all active offers
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $query = Offer::active();
         
@@ -48,30 +53,50 @@ class OfferController extends Controller
         $perPage = $request->get('per_page', 15);
         $offers = $query->paginate($perPage);
         
-        return OfferResource::collection($offers);
+        return self::collectionResponse(
+            'Offers retrieved successfully',
+            OfferResource::collection($offers)
+        );
     }
 
     // Get featured offers
-    public function featured()
+    public function featured(): JsonResponse
     {
         $offers = Offer::featured()
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
             
-        return OfferResource::collection($offers);
+        return self::collectionResponse(
+            'Featured offers retrieved successfully',
+            OfferResource::collection($offers)
+        );
     }
 
     // Get offer by code
-    public function showByCode($code)
+    public function showByCode($code): JsonResponse
     {
         $offer = Offer::where('code', $code)->firstOrFail();
         
-        return new OfferResource($offer);
+        return self::successResponse(
+            'Offer retrieved successfully',
+            new OfferResource($offer)
+        );
+    }
+
+    /**
+     * Display the specified offer.
+     */
+    public function show(Offer $offer): JsonResponse
+    {
+        return self::successResponse(
+            'Offer retrieved successfully',
+            new OfferResource($offer)
+        );
     }
 
     // Validate offer code
-    public function validateOffer(Request $request)
+    public function validateOffer(Request $request): JsonResponse
     {
         $request->validate([
             'code' => 'required|string',
@@ -81,10 +106,7 @@ class OfferController extends Controller
         $offer = Offer::where('code', $request->code)->first();
         
         if (!$offer) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Invalid offer code',
-            ], 404);
+            return self::errorResponse('Invalid offer code', null, 404);
         }
         
         $isValid = $offer->isValid();
@@ -102,11 +124,10 @@ class OfferController extends Controller
             ? $offer->calculateDiscount($request->amount ?? 0)
             : 0;
         
-        return response()->json([
+        return self::successResponse($message, [
             'valid' => $isValid && $canApply,
             'offer' => new OfferResource($offer),
             'discount_amount' => $discount,
-            'message' => $message,
         ]);
     }
 }
