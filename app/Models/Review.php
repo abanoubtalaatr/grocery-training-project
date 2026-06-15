@@ -5,6 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use App\Filters\ReviewFilter;
+use App\Models\User;
 
 class Review extends Model
 {
@@ -66,6 +70,11 @@ class Review extends Model
     {
         return $query->where('user_id', $userId);
     }
+    public function scopeSearch(Builder $builder, Request $request)
+     {
+      $filter = new ReviewFilter($request);
+      return $filter->apply($builder);  
+     }
 
     /**
      * Accessors & Mutators

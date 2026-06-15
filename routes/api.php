@@ -222,6 +222,8 @@ Route::prefix('offers')->group(function () {
 });
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
+    Route::get('/Search', [CategoryController::class, 'Search']);
+
     Route::get('/{id}', [CategoryController::class, 'show']);
     Route::get('/{id}/meals', [CategoryController::class, 'meals']);
 });
@@ -229,6 +231,7 @@ Route::prefix('categories')->group(function () {
 // Subcategories routes
 Route::prefix('subcategories')->group(function () {
     Route::get('/', [SubcategoryController::class, 'index']);
+
     Route::get('/{id}', [SubcategoryController::class, 'show']);
     Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
 });
@@ -245,4 +248,16 @@ Route::get('/health', function () {
         'message' => 'API is running',
         'timestamp' => now(),
     ]);
+
 });
+
+Route::get("/reviews", [\App\Http\Controllers\Api\ReviewController::class, 'index'])->name('reviews.index');
+Route::post("/reviews/{id}", [\App\Http\Controllers\Api\ReviewController::class, 'show'])->name('reviews.show');
+Route::post("/reviews_Search", [\App\Http\Controllers\Api\ReviewController::class, 'Search'])->name('reviews.search');
+Route::apiResource('meals', MealController::class); 
+
+
+use App\Jobs\SendEmail;
+
+// روت للتجربة السريعة بيعمل dispatch للـ Job فوراً
+Route::middleware('auth:sanctum')->post('/send-invoice', [App\Http\Controllers\SendInvoiceController::class, 'sendInvoice']);
