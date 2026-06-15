@@ -16,6 +16,7 @@ class DataManagementController extends Controller
         private readonly AuthService $authService,
     ) {}
 
+
     public function download(Request $request): StreamedResponse
     {
         $user = $request->user();

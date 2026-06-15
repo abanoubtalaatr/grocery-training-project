@@ -95,12 +95,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::prefix('addresses')->group(function () {
-        Route::get('/', [AddressController::class, 'index']);
-        Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
-        Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+      Route::apiResource('addresses', AddressController::class);
+
+    Route::post(  'addresses/{address}/set-default',    [AddressController::class, 'setDefault']);
     });
 
     Route::post('smart-lists/{id}/meals', [SmartListController::class, 'addMeal']);
@@ -140,18 +137,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Cart routes
     Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/items', [CartController::class, 'addItem']);
-        Route::put('/items/{itemId}', [CartController::class, 'updateItem']);
-        Route::delete('/items/{itemId}', [CartController::class, 'removeItem']);
-        Route::delete('/clear', [CartController::class, 'clear']);
+     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
+        Route::delete('/cart/clear', [CartController::class, 'clear']);
     });
 
     // Favorites routes
     Route::prefix('favorites')->group(function () {
-        Route::get('/', [FavoriteController::class, 'index']);
-        Route::post('/{mealId}/toggle', [FavoriteController::class, 'toggle']);
-        Route::get('/{mealId}/check', [FavoriteController::class, 'check']);
+     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
         Route::delete('/{mealId}', [FavoriteController::class, 'remove']);
     });
 
@@ -169,10 +161,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Order routes
     Route::prefix('orders')->group(function () {
-        Route::post('/', [OrderController::class, 'store']);
-        Route::get('/', [OrderController::class, 'index']);
-        Route::get('/track', [OrderController::class, 'track']);
-        Route::get('/{id}', [OrderController::class, 'show']);
+       Route::apiResource('orders', OrderController::class)
+    ->only(['index', 'show', 'store']);
+
+    Route::get('orders/track', [OrderController::class, 'track']);
     });
 
     // Payment routes
