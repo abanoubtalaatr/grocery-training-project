@@ -25,7 +25,7 @@ class SettingController extends Controller
     /**
      * Update settings
      */
-    public function update( $request): JsonResponse
+    public function update(SettingRequest $request): JsonResponse
     {
         $settings = Setting::getSettings();
         

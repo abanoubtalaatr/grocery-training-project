@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SmartListController;
 use App\Http\Controllers\Api\SpecialNoteController;
@@ -82,14 +83,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('addresses')->group(function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
-        Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+        Route::get('/{address}', [AddressController::class, 'show']);
+        Route::put('/{address}', [AddressController::class, 'update']);
+        Route::delete('/{address}', [AddressController::class, 'destroy']);
+        Route::post('/{address}/set-default', [AddressController::class, 'setDefault']);
     });
 
-    Route::post('smart-lists/{id}/meals', [SmartListController::class, 'addMeal']);
-    Route::delete('smart-lists/{id}/meals/{mealId}', [SmartListController::class, 'removeMeal']);
+    Route::post('smart-lists/{smart_list}/meals', [SmartListController::class, 'addMeal']);
+    Route::delete('smart-lists/{smart_list}/meals/{meal}', [SmartListController::class, 'removeMeal']);
     Route::apiResource('smart-lists', SmartListController::class);
 
     Route::prefix('notification-settings')->group(function () {
@@ -109,10 +110,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/recent', [NotificationController::class, 'recent']);
 
         // Single notification operations
-        Route::get('/{id}', [NotificationController::class, 'show']);
-        Route::put('/{id}/read', [NotificationController::class, 'markAsRead']);
-        Route::put('/{id}/unread', [NotificationController::class, 'markAsUnread']);
-        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        Route::get('/{notification}', [NotificationController::class, 'show']);
+        Route::put('/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::put('/{notification}/unread', [NotificationController::class, 'markAsUnread']);
+        Route::delete('/{notification}', [NotificationController::class, 'destroy']);
 
         // Bulk operations
         Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
@@ -135,9 +136,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Favorites routes
     Route::prefix('favorites')->group(function () {
         Route::get('/', [FavoriteController::class, 'index']);
-        Route::post('/{mealId}/toggle', [FavoriteController::class, 'toggle']);
-        Route::get('/{mealId}/check', [FavoriteController::class, 'check']);
-        Route::delete('/{mealId}', [FavoriteController::class, 'remove']);
+        Route::post('/{meal}/toggle', [FavoriteController::class, 'toggle']);
+        Route::get('/{meal}/check', [FavoriteController::class, 'check']);
+        Route::delete('/{meal}', [FavoriteController::class, 'remove']);
     });
 
     // Chatbot routes
@@ -157,7 +158,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [OrderController::class, 'store']);
         Route::get('/', [OrderController::class, 'index']);
         Route::get('/track', [OrderController::class, 'track']);
-        Route::get('/{id}', [OrderController::class, 'show']);
+        Route::get('/{order}', [OrderController::class, 'show']);
     });
 
     // Payment routes
@@ -171,6 +172,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard route
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // Review routes
+    Route::get('/reviews/user', [ReviewController::class, 'getUserReviews']);
+    Route::apiResource('reviews', ReviewController::class);
 
     // Loyalty & rewards
     Route::get('/loyalty', [LoyaltyController::class, 'index']);
@@ -202,8 +207,9 @@ Route::prefix('meals')->group(function () {
 
     Route::get('/recommendations', [MealController::class, 'recommendations']);
     Route::get('/', [MealController::class, 'index']);
-    Route::get('/{id}', [MealController::class, 'show']);
-
+    Route::get('/{meal}', [MealController::class, 'show'])->name('meals.show');
+    Route::get('/{meal}/reviews', [ReviewController::class, 'getMealReviews']);
+    Route::get('/{meal}/reviews/stats', [ReviewController::class, 'getMealReviewStats']);
 });
 Route::get('/new-products', [MealController::class, 'newProducts']);
 Route::get('best-sells', [MealController::class, 'bestSells']);
@@ -218,23 +224,23 @@ Route::prefix('offers')->group(function () {
     Route::get('/', [OfferController::class, 'index']);
     Route::get('/featured', [OfferController::class, 'featured']);
     Route::get('/validate', [OfferController::class, 'validateOffer']);
-    Route::get('/{code}', [OfferController::class, 'showByCode']);
+    Route::get('/{offer:code}', [OfferController::class, 'showByCode']);
 });
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/{id}', [CategoryController::class, 'show']);
-    Route::get('/{id}/meals', [CategoryController::class, 'meals']);
+    Route::get('/{category}', [CategoryController::class, 'show']);
+    Route::get('/{category}/meals', [CategoryController::class, 'meals']);
 });
 
 // Subcategories routes
 Route::prefix('subcategories')->group(function () {
     Route::get('/', [SubcategoryController::class, 'index']);
-    Route::get('/{id}', [SubcategoryController::class, 'show']);
-    Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
+    Route::get('/{subcategory}', [SubcategoryController::class, 'show']);
+    Route::get('/{subcategory}/meals', [SubcategoryController::class, 'meals']);
 });
 Route::get('/faqs', [FaqController::class, 'index']);
 Route::get('/pages', [StaticPageController::class, 'index']);
-Route::get('/pages/slug/{slug}', [StaticPageController::class, 'showBySlug']);
+Route::get('/pages/slug/{staticPage:slug}', [StaticPageController::class, 'showBySlug']);
 Route::get('/pages/important', [StaticPageController::class, 'importantPages']);
 Route::post('/contact', [ContactController::class, 'submit']);
 

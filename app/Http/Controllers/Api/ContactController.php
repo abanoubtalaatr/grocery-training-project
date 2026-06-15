@@ -3,43 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ContactSubmitRequest;
+use App\Http\Requests\UpdateContactMessageStatusRequest;
 use App\Http\Resources\ContactMessageCollection;
 use App\Http\Resources\ContactMessageResource;
 use App\Mail\ContactMessageReceived;
 use App\Models\ContactMessage;
-use App\Support\EmailValidation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
     /**
      * Submit a contact message.
      */
-    public function submit(Request $request)
+    public function submit(ContactSubmitRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => ['required', ...EmailValidation::formatRules(), 'max:255'],
-            'phone' => 'nullable|string|max:20',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|min:10|max:250',
-            // 'g-recaptcha-response' => 'required|recaptcha' // If using reCAPTCHA
-        ], [
-            'email.not_regex' => EmailValidation::trailingHyphenDotBeforeAtMessage(),
-            'email.regex' => EmailValidation::domainStructureMessage(),
-            'email.max' => 'The email address may not exceed 255 characters.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
         // Check for spam (simple check for demo)
         if ($this->isSpam($request->message, $request->email)) {
             return response()->json([
@@ -80,7 +61,7 @@ class ContactController extends Controller
     /**
      * Get all contact messages (admin only).
      */
-    public function index(Request $request)
+    public function index(Request $request): ContactMessageCollection
     {
         $this->authorize('viewAny', ContactMessage::class);
 
@@ -124,7 +105,7 @@ class ContactController extends Controller
     /**
      * Show specific contact message (admin only).
      */
-    public function show(ContactMessage $contactMessage)
+    public function show(ContactMessage $contactMessage): ContactMessageResource
     {
         $this->authorize('view', $contactMessage);
 
@@ -139,21 +120,9 @@ class ContactController extends Controller
     /**
      * Update contact message status (admin only).
      */
-    public function updateStatus(Request $request, ContactMessage $contactMessage)
+    public function updateStatus(UpdateContactMessageStatusRequest $request, ContactMessage $contactMessage): JsonResponse
     {
         $this->authorize('update', $contactMessage);
-
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:read,replied,spam',
-            'admin_notes' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
 
         $contactMessage->update([
             'status' => $request->status,
@@ -169,7 +138,7 @@ class ContactController extends Controller
     /**
      * Delete contact message (admin only).
      */
-    public function destroy(ContactMessage $contactMessage)
+    public function destroy(ContactMessage $contactMessage): JsonResponse
     {
         $this->authorize('delete', $contactMessage);
 
@@ -183,7 +152,7 @@ class ContactController extends Controller
     /**
      * Get contact statistics (admin only).
      */
-    public function statistics()
+    public function statistics(): JsonResponse
     {
         $this->authorize('viewAny', ContactMessage::class);
 
@@ -220,7 +189,7 @@ class ContactController extends Controller
     /**
      * Simple spam detection.
      */
-    private function isSpam($message, $email): bool
+    private function isSpam(string $message, string $email): bool
     {
         $spamKeywords = [
             'viagra', 'casino', 'loan', 'debt', 'free money',
@@ -238,3 +207,4 @@ class ContactController extends Controller
         return false;
     }
 }
+

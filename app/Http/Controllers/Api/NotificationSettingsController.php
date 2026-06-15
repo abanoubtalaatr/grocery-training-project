@@ -3,44 +3,36 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\UpdateNotificationCategoryRequest;
-use App\Http\Requests\Api\UpdateNotificationSettingsRequest;
+use App\Http\Requests\UpdateNotificationCategoryRequest;
+use App\Http\Requests\UpdateNotificationSettingsRequest;
 use App\Models\UserNotificationSetting;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class NotificationSettingsController extends Controller
 {
     /**
      * Get user notification settings
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        try {
-            $user = Auth::user();
-            $settings = $user->initializeNotificationSettings();
+        $user = $request->user();
+        $settings = $user->initializeNotificationSettings();
 
-            return response()->json([
-                'success' => true,
-                'data' => $settings ? $this->formatSettings($settings) : $this->defaultSettingsStructure(),
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => true,
-                'data' => $this->defaultSettingsStructure(),
-            ]);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $settings ? $this->formatSettings($settings) : $this->defaultSettingsStructure(),
+        ]);
     }
 
     /**
      * Update notification settings.
-     * Only accepts true, false, 0, or 1 for each setting; invalid values (e.g. 4) return 422.
+     * Only accepts true, false, 0, or 1 for each setting; invalid values return 422.
      */
     public function update(UpdateNotificationSettingsRequest $request): JsonResponse
     {
         $validated = $request->validated();
-
-        $user = Auth::user();
+        $user = $request->user();
         $settings = $user->initializeNotificationSettings();
         $settings->update($validated);
 
@@ -58,8 +50,7 @@ class NotificationSettingsController extends Controller
     public function updateCategory(UpdateNotificationCategoryRequest $request, string $category): JsonResponse
     {
         $validated = $request->validated();
-
-        $user = Auth::user();
+        $user = $request->user();
         $settings = $user->initializeNotificationSettings();
 
         $fields = $this->getCategoryFields($category);
@@ -133,7 +124,7 @@ class NotificationSettingsController extends Controller
     /**
      * Format settings for response
      */
-    private function formatSettings(UserNotificationSetting $settings)
+    private function formatSettings(UserNotificationSetting $settings): array
     {
         return [
             'order_delivery_updates' => [
@@ -190,3 +181,4 @@ class NotificationSettingsController extends Controller
         return $categories[$category] ?? [];
     }
 }
+
