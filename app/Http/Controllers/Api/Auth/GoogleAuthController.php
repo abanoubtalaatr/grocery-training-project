@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\V1\ApiResponse;
 use Google\Client as GoogleClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use Throwable;
 
 class GoogleAuthController extends Controller
 {
+    use ApiResponse;
+
     private const INVALID_GOOGLE_TOKEN_MESSAGE = 'Invalid Google token.';
     private const ALLOWED_GOOGLE_ISSUERS = [
         'accounts.google.com',
@@ -28,10 +31,7 @@ class GoogleAuthController extends Controller
 
         $allowedClientIds = $this->allowedGoogleClientIds();
         if (empty($allowedClientIds)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Google sign-in is not configured.',
-            ], 503);
+            return self::errorResponse('Google sign-in is not configured.', null, 503);
         }
 
         try {
@@ -42,17 +42,11 @@ class GoogleAuthController extends Controller
         } catch (Throwable $e) {
             Log::warning('Google ID token verification failed', ['message' => $e->getMessage()]);
 
-            return response()->json([
-                'success' => false,
-                'message' => self::INVALID_GOOGLE_TOKEN_MESSAGE,
-            ], 401);
+            return self::errorResponse(self::INVALID_GOOGLE_TOKEN_MESSAGE, null, 401);
         }
 
         if (! is_array($payload) || ! $this->isValidGooglePayload($payload, $allowedClientIds)) {
-            return response()->json([
-                'success' => false,
-                'message' => self::INVALID_GOOGLE_TOKEN_MESSAGE,
-            ], 401);
+            return self::errorResponse(self::INVALID_GOOGLE_TOKEN_MESSAGE, null, 401);
         }
 
         try {
@@ -62,10 +56,7 @@ class GoogleAuthController extends Controller
 
             if ($user) {
                 if (! $user->is_active) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Your account has been deactivated.',
-                    ], 403);
+                    return self::errorResponse('Your account has been deactivated.', null, 403);
                 }
 
                 $user->fill([
@@ -96,38 +87,28 @@ class GoogleAuthController extends Controller
             $deviceName = trim((string) $request->input('device_name', 'google_auth'));
             $token = $user->createToken($deviceName !== '' ? $deviceName : 'google_auth')->plainTextToken;
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
-                    'user' => [
-                        'id' => $user->id,
-                        'username' => $user->username,
-                        'email' => $user->email,
-                        'phone' => $user->phone,
-                    ],
-                    'token' => $token,
+            return self::successResponse('Login successful', [
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
                 ],
+                'token' => $token,
             ]);
         } catch (Throwable $e) {
             $msg = $e->getMessage();
             if (str_contains($msg, 'Wrong number of segments')
                 || str_contains($msg, 'JWT')
                 || str_contains($msg, 'jwt')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => self::INVALID_GOOGLE_TOKEN_MESSAGE,
-                ], 401);
+                return self::errorResponse(self::INVALID_GOOGLE_TOKEN_MESSAGE, null, 401);
             }
 
             Log::error('Google login failed', [
                 'message' => $msg,
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Google sign-in failed. Please try again.',
-            ], 500);
+            return self::errorResponse('Google sign-in failed. Please try again.', null, 500);
         }
     }
 

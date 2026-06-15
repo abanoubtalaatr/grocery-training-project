@@ -4,22 +4,25 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\UserAppSettingsService;
+use App\Traits\V1\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class UserAppSettingsController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private readonly UserAppSettingsService $settingsService,
     ) {}
 
     public function showLanguage(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => $this->settingsService->getLanguage($request->user()),
-        ]);
+        return self::successResponse(
+            'Language settings retrieved successfully',
+            $this->settingsService->getLanguage($request->user())
+        );
     }
 
     public function updateLanguage(Request $request): JsonResponse
@@ -29,29 +32,23 @@ class UserAppSettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Language updated successfully',
-            'data' => $this->settingsService->updateLanguage(
-                $request->user(),
-                (string) $request->input('language'),
-            ),
-        ]);
+        $data = $this->settingsService->updateLanguage(
+            $request->user(),
+            (string) $request->input('language'),
+        );
+
+        return self::successResponse('Language updated successfully', $data);
     }
 
     public function showAppearance(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => $this->settingsService->getAppearance($request->user()),
-        ]);
+        return self::successResponse(
+            'Appearance settings retrieved successfully',
+            $this->settingsService->getAppearance($request->user())
+        );
     }
 
     public function updateAppearance(Request $request): JsonResponse
@@ -61,29 +58,23 @@ class UserAppSettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Appearance updated successfully',
-            'data' => $this->settingsService->updateAppearance(
-                $request->user(),
-                (string) $request->input('theme'),
-            ),
-        ]);
+        $data = $this->settingsService->updateAppearance(
+            $request->user(),
+            (string) $request->input('theme'),
+        );
+
+        return self::successResponse('Appearance updated successfully', $data);
     }
 
     public function showNotificationPreferences(Request $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => $this->settingsService->getNotificationPreferences($request->user()),
-        ]);
+        return self::successResponse(
+            'Notification preferences retrieved successfully',
+            $this->settingsService->getNotificationPreferences($request->user())
+        );
     }
 
     public function updateNotificationPreferences(Request $request): JsonResponse
@@ -96,20 +87,14 @@ class UserAppSettingsController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification preferences updated successfully',
-            'data' => $this->settingsService->updateNotificationPreferences(
-                $request->user(),
-                $validator->validated(),
-            ),
-        ]);
+        $data = $this->settingsService->updateNotificationPreferences(
+            $request->user(),
+            $validator->validated(),
+        );
+
+        return self::successResponse('Notification preferences updated successfully', $data);
     }
 }

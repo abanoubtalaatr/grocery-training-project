@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\SupportReportResource;
 use App\Models\Order;
 use App\Models\SupportReport;
+use App\Traits\V1\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SupportController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Submit a support / problem report for the authenticated user.
      */
@@ -24,11 +27,7 @@ class SupportController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
         $user = $request->user();
@@ -43,12 +42,8 @@ class SupportController extends Controller
                 ->exists();
 
             if (! $orderExists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => [
-                        'order_number' => ['Order number not found on your account.'],
-                    ],
+                return self::errorResponse('Validation failed', [
+                    'order_number' => ['Order number not found on your account.'],
                 ], 422);
             }
         } else {
@@ -64,10 +59,10 @@ class SupportController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Support report submitted successfully',
-            'data' => new SupportReportResource($report),
-        ], 201);
+        return self::successResponse(
+            'Support report submitted successfully',
+            new SupportReportResource($report),
+            201
+        );
     }
 }
