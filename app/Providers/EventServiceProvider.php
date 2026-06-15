@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use App\Events\OrderCreated;
+use App\Listeners\SendOrderInvoiceListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,9 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        //
+        OrderCreated::class => [
+            SendOrderInvoiceListener::class,
+        ],
     ];
 
     /**
