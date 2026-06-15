@@ -20,7 +20,7 @@ class OrderInvoiceMail extends Mailable
      */
     public function __construct(
         public Order $order,
-        public mixed $pdf = null
+        public $pdf = null
     ) {
     }
 
