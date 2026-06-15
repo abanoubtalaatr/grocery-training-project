@@ -42,31 +42,14 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 |
 */
 
-Route::prefix('v1')->group(function () {
-    Route::get('/meals', [ApiMealController::class, 'index']);
-});
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
-// Public routes - Authentication
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-    Route::post('/google', [GoogleAuthController::class, 'login']);
-});
+
 
 // Protected routes - Require authentication
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth routes
-    Route::prefix('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/change-password', [AuthController::class, 'changePassword']);
-        Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
-        Route::get('/me', [AuthController::class, 'me']);
-    });
+
 
     // Profile routes
     Route::prefix('profile')->group(function () {
