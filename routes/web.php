@@ -3,6 +3,7 @@
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +35,8 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+Route::get(
+    '/send-invoice',
+    [InvoiceController::class, 'store']
+);
