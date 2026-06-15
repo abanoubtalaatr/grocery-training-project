@@ -13,6 +13,7 @@ use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -24,71 +25,38 @@ class AuthController extends Controller
      * Register a new user
      */
     public function register(RegisterRequest $request): JsonResponse
-    {
-        try {
-            $result = $this->authService->register($request->validated());
+{
+    $result = $this->authService->register($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful',
-                'data' => [
-                    'user' => [
-                        'id' => $result['user']->id,
-                        'username' => $result['user']->username,
-                        'email' => $result['user']->email,
-                        'phone' => $result['user']->phone,
-                        'created_at' => $result['user']->created_at,
-                    ],
-                    'token' => $result['token'],
-                ],
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration failed',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Registration successful',
+        'data' => [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+        ],
+    ], 201);
+}
 
     /**
      * Login user
      */
-    public function login(LoginRequest $request): JsonResponse
-    {
-        try {
-            $result = $this->authService->login(
-                $request->input('login'),
-                $request->input('password')
-            );
+ public function login(LoginRequest $request): JsonResponse
+{
+    $result = $this->authService->login(
+        $request->input('login'),
+        $request->input('password')
+    );
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
-                    'user' => [
-                        'id' => $result['user']->id,
-                        'username' => $result['user']->username,
-                        'email' => $result['user']->email,
-                        'phone' => $result['user']->phone,
-                    ],
-                    'token' => $result['token'],
-                ],
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed',
-                'errors' => $e->errors(),
-            ], 401);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Login successful',
+        'data' => [
+            'user' => new UserResource($result['user']),
+            'token' => $result['token'],
+        ],
+    ]);
+}
 
     /**
      * Logout user
