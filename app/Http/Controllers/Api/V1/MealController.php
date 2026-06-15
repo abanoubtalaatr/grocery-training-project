@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Api\V1\ListMealsAction;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use App\Models\Meal;
+use Illuminate\Http\JsonResponse;
 
 class MealController extends Controller
 {
-    public function index(Request $request)
-    {
-        $meals = Meal::query()->filter($request);
+    use ApiResponseTrait;
 
-        return response()->json($meals->get());
+    public function index(Request $request, ListMealsAction $action): JsonResponse
+    {
+        return $this->jsonResponse($action->execute($request));
     }
 }

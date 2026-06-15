@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Api\V1\ListReviewsAction;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use App\Models\Review;
+use Illuminate\Http\JsonResponse;
 
 class ReviewController extends Controller
 {
-    public function index(Request $request)
-    {
-        $reviews = Review::query()->filter($request);
+    use ApiResponseTrait;
 
-        return response()->json($reviews->get());
+    public function index(Request $request, ListReviewsAction $action): JsonResponse
+    {
+        return $this->jsonResponse($action->execute($request));
     }
 }

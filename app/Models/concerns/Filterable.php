@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 trait Filterable
 {
+
     public function scopeFilter(Builder $query, Request $request): Builder
     {
         $static = self::resolveFilterClass();

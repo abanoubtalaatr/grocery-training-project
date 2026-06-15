@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Api\V1\ListCategoriesAction;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
-use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
-    {
-        $categories = Category::query()->filter($request);
+    use ApiResponseTrait;
 
-        return response()->json($categories->get());
+    public function index(Request $request, ListCategoriesAction $action): JsonResponse
+    {
+        return $this->jsonResponse($action->execute($request));
     }
 }
