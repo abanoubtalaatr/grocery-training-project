@@ -12,7 +12,7 @@ class CategoryController extends Controller
 
     public function index(Request $request)
     {
-          $categories = Category::query()->filter($request);
+          $categories = Category::query()->select('name','description')->filter($request);
 
         return response()->json($categories->get());
 
