@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Concerns\Filterable;
 
 class Offer extends Model
 {
-    use HasFactory;
+    use HasFactory, Filterable;
 
     protected $fillable = [
         'title',
@@ -38,23 +39,23 @@ class Offer extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)
-                     ->where('start_date', '<=', now())
-                     ->where('end_date', '>=', now());
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
     }
 
     // Scope for featured offers
     public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true)
-                     ->where('is_active', true)
-                     ->where('start_date', '<=', now())
-                     ->where('end_date', '>=', now());
+            ->where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now());
     }
 
     // Check if offer is valid
     public function isValid(): bool
     {
-        return $this->is_active 
+        return $this->is_active
             && now()->between($this->start_date, $this->end_date)
             && ($this->usage_limit === null || $this->used_count < $this->usage_limit);
     }
@@ -75,7 +76,7 @@ class Offer extends Model
             return 0;
         }
 
-        return match($this->type) {
+        return match ($this->type) {
             'percentage' => $amount * ($this->discount_value / 100),
             'fixed' => min($this->discount_value, $amount),
             default => 0,

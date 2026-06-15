@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DashboardController;
@@ -46,6 +47,9 @@ use App\Http\Controllers\InvoiceController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/offers', [OfferController::class, 'index']);
+    Route::get('/reviews', [ReviewController::class, 'index']);
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);

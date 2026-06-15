@@ -24,7 +24,7 @@ abstract class QueryFilter
         return $this->builder;
     }
 
-    
+
     protected function filterableParameters(): array
     {
         return collect($this->request->keys())
