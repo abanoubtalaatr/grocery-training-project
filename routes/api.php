@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\StripeCheckoutController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
+use App\Http\Controllers\Api\V1\DefaultAddressController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Jobs\SendToEmailJob;
@@ -114,7 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/{id}', [AddressController::class, 'show']);
     Route::put('/{id}', [AddressController::class, 'update']);
     Route::delete('/{id}', [AddressController::class, 'destroy']);
-    Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+    Route::post('/{id}/set-default', [DefaultAddressController::class]);
   });
 
   Route::post('smart-lists/{id}/meals', [SmartListController::class, 'addMeal']);

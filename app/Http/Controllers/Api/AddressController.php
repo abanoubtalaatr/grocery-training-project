@@ -14,8 +14,8 @@ use App\Models\User;
 use App\Traits\V1\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+// use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Validator;
 
 class AddressController extends Controller
 {
@@ -60,9 +60,9 @@ class AddressController extends Controller
    */
   public function show(Request $request, Address $id): JsonResponse
   {
-    return $this->successResponse('Address retrieved successfully',new AddressResource($id),200);
+    return $this->successResponse('Address retrieved successfully', new AddressResource($id), 200);
   }
-  
+
 
   /**
    * Create new address
@@ -140,6 +140,4 @@ class AddressController extends Controller
       );
     }
   }
-
-  
 }
