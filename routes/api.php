@@ -35,6 +35,8 @@ use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\SubcategoryController as ApiSubcategoryController;
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
 use App\Http\Controllers\Api\V1\InvoiceController as ApiInvoiceController;
+use App\Http\Controllers\Api\Addresses\SetDefaultAddressController;
+
 
 
 /*
@@ -96,12 +98,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::prefix('addresses')->group(function () {
-        Route::get('/', [AddressController::class, 'index']);
-        Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
-        Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+        Route::apiResource('/', AddressController::class);
+        Route::post('/{id}/set-default', [SetDefaultAddressController::class]);
     });
 
     Route::post('smart-lists/{id}/meals', [SmartListController::class, 'addMeal']);
