@@ -233,6 +233,7 @@ Route::prefix('meals')->group(function () {
   Route::get('/', [MealController::class, 'index']);
   Route::get('/{id}', [MealController::class, 'show']);
 });
+
 Route::get('/new-products', [MealController::class, 'newProducts']);
 Route::get('best-sells', [MealController::class, 'bestSells']);
 Route::get('sliders', [MealController::class, 'slider']);
