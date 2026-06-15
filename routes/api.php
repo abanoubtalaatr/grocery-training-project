@@ -31,6 +31,27 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use Illuminate\Http\Request;
+/*use App\Jobs\SendInvoiceMailJob;
+
+Route::get('/send-invoice', function (Request $request) {
+    
+    SendInvoiceMailJob::dispatch();
+    return response()->json(['message' => 'Job queued successfully']);
+});*/
+
+use App\Jobs\SendInvoiceMailJob;
+
+Route::get('/send-invoice', function () {
+
+    SendInvoiceMailJob::dispatch(
+        'customer@example.com'
+    );
+
+    return response()->json([
+        'message' => 'Job queued successfully'
+    ]);
+});
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,7 +65,8 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
-});
+
+    });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
