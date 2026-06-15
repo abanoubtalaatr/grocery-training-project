@@ -249,6 +249,4 @@ Route::get('/health', function () {
 });
 
 
-
-
 Route::post('/send-invoice', [InvoiceController::class, 'store']);
