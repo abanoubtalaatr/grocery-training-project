@@ -9,9 +9,9 @@ use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DataManagementController;
-use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\MealController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotificationSettingsController;
@@ -19,18 +19,24 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\V1\SendInvocController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SmartListController;
 use App\Http\Controllers\Api\SpecialNoteController;
 use App\Http\Controllers\Api\StaticPageController;
-use App\Http\Controllers\Api\SupportController;
-use App\Http\Controllers\Api\UserAppSettingsController;
 use App\Http\Controllers\Api\StripeCheckoutController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\UserAppSettingsController;
+use App\Http\Controllers\Api\V1\FailedJobController;
+use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
+use App\Jobs\SendEmailJob;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,7 +50,21 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+    Route::get('/categories',[ApiCategoryController::class,'index']);
+    Route::get('/reviews',[ApiReviewController::class,'index']);
+
 });
+
+
+//----------- JOBS ------------//
+
+Route::get('/send-invoice', [SendInvocController::class ,'send']);
+
+
+
+Route::get('/failed-jobs', [FailedJobController::class, 'index']);
+
+///////////////////////////////////////////
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 

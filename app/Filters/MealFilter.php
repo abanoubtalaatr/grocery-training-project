@@ -15,4 +15,7 @@ class MealFilter extends QueryFilter
     {
         $this->builder->where('is_available', $value);
     }
+
+    
+    
 }
