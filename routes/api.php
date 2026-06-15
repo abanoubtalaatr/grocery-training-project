@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\MailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +53,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::post('/google', [GoogleAuthController::class, 'login']);
+});
+
+// Mail & Invoice routes
+Route::prefix('mail')->group(function () {
+    Route::post('/send',              [MailController::class, 'send']);             
+    Route::post('/send-with-upload',  [MailController::class, 'sendWithUpload']);   
+    Route::post('/send-with-path',    [MailController::class, 'sendWithPath']);     
 });
 
 // Protected routes - Require authentication
@@ -233,6 +241,7 @@ Route::get('/pages', [StaticPageController::class, 'index']);
 Route::get('/pages/slug/{slug}', [StaticPageController::class, 'showBySlug']);
 Route::get('/pages/important', [StaticPageController::class, 'importantPages']);
 Route::post('/contact', [ContactController::class, 'submit']);
+
 
 // Health check route
 Route::get('/health', function () {
