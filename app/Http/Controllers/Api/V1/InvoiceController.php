@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 class InvoiceController extends Controller
 {
     //
-    public function send(Request $request)
+    public function send1(Request $request)
     {
            $validate=$request->validate([
-            'eamil'=>$request->email
+            'email'=>'required'
            ]);
 
            InvoiceJob::dispatch($validate['email']);

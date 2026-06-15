@@ -52,7 +52,7 @@ Route::get('email-send',function(){
   return response()->json(['message'=>"Email send"]);
 });
 
-Route::get('send-invoice',[InvoiceController::class, 'send']);
+Route::get('send-invoice',[InvoiceController::class, 'send1']);
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
