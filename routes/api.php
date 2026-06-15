@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Http\Controllers\Api\V1\SendInvoiceController as ApiSendInvoiceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,6 +45,7 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+    Route::post('/sendInvoice', [ApiSendInvoiceController::class, 'send']);
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
@@ -203,7 +205,6 @@ Route::prefix('meals')->group(function () {
     Route::get('/recommendations', [MealController::class, 'recommendations']);
     Route::get('/', [MealController::class, 'index']);
     Route::get('/{id}', [MealController::class, 'show']);
-
 });
 Route::get('/new-products', [MealController::class, 'newProducts']);
 Route::get('best-sells', [MealController::class, 'bestSells']);
