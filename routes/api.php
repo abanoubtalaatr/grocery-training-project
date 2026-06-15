@@ -34,7 +34,7 @@ use App\Jobs\SendEmailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -69,6 +69,10 @@ Route::prefix("v1")->group(function(){
 
 
 
+
+Route::prefix('v1')->group(function () {
+    Route::get('/meals', [ApiMealController::class, 'index']);
+});
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 

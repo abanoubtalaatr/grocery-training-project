@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Meal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Filterable;
 
     /**
      * The attributes that are mass assignable.
