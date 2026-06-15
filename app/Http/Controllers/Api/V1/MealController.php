@@ -11,7 +11,6 @@ class MealController extends Controller
     public function index(Request $request)
     {
         $meals = Meal::query()->filter($request);
-
-        return response()->json($meals->get());
+        return response()->json($meals->paginate($request->input('per_page', 5)));
     }
 }
