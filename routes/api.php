@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DataManagementController;
 use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\MealController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotificationSettingsController;
@@ -31,6 +32,8 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Jobs\InventoryJob;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -45,6 +48,16 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
 });
+
+Route::get('/inventory-job', function () {
+    InventoryJob::dispatch();
+
+    return response()->json([
+        'message' => 'Job dispatched successfully'
+    ]);
+    });
+
+    Route::post('/invoices', [InvoiceController::class, 'store']);
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
@@ -245,4 +258,6 @@ Route::get('/health', function () {
         'message' => 'API is running',
         'timestamp' => now(),
     ]);
+
+
 });
