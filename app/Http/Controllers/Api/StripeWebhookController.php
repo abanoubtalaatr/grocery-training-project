@@ -16,10 +16,13 @@ class StripeWebhookController extends Controller
         private readonly StripeWebhookService $webhookService
     ) {}
 
+    /**
+     * Handle Stripe Webhook request.
+     */
     public function handle(Request $request): Response
     {
         $secret = config('services.stripe.webhook_secret');
-        if (! is_string($secret) || $secret === '') {
+        if (!is_string($secret) || $secret === '') {
             return response('Webhook not configured.', 500);
         }
 
@@ -40,7 +43,6 @@ class StripeWebhookController extends Controller
             $this->webhookService->handleEvent($event);
         } catch (\Throwable $e) {
             report($e);
-
             return response('Handler error.', 500);
         }
 

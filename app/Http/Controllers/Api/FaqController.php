@@ -3,18 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreFaqRequest;
+use App\Http\Requests\UpdateFaqRequest;
 use App\Http\Resources\FaqResource;
 use App\Http\Resources\FaqCollection;
 use App\Models\Faq;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class FaqController extends Controller
 {
     /**
      * Display a listing of the FAQs.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $query = Faq::query();
 
@@ -66,24 +69,9 @@ class FaqController extends Controller
     /**
      * Store a newly created FAQ.
      */
-    public function store(Request $request)
+    public function store(StoreFaqRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'question' => 'required|string|max:255',
-            'answer' => 'required|string',
-            'category' => 'nullable|string|max:100',
-            'order' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        $faq = Faq::create($validator->validated());
+        $faq = Faq::create($request->validated());
 
         return response()->json([
             'message' => 'FAQ created successfully',
@@ -94,7 +82,7 @@ class FaqController extends Controller
     /**
      * Display the specified FAQ.
      */
-    public function show(Faq $faq)
+    public function show(Faq $faq): FaqResource
     {
         return new FaqResource($faq);
     }
@@ -102,24 +90,9 @@ class FaqController extends Controller
     /**
      * Update the specified FAQ.
      */
-    public function update(Request $request, Faq $faq)
+    public function update(UpdateFaqRequest $request, Faq $faq): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'question' => 'sometimes|required|string|max:255',
-            'answer' => 'sometimes|required|string',
-            'category' => 'nullable|string|max:100',
-            'order' => 'nullable|integer',
-            'is_active' => 'sometimes|boolean',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        $faq->update($validator->validated());
+        $faq->update($request->validated());
 
         return response()->json([
             'message' => 'FAQ updated successfully',
@@ -130,7 +103,7 @@ class FaqController extends Controller
     /**
      * Remove the specified FAQ.
      */
-    public function destroy(Faq $faq)
+    public function destroy(Faq $faq): JsonResponse
     {
         $faq->delete();
 
@@ -142,7 +115,7 @@ class FaqController extends Controller
     /**
      * Get all FAQ categories.
      */
-    public function categories()
+    public function categories(): JsonResponse
     {
         $categories = Faq::active()
             ->distinct('category')
@@ -158,7 +131,7 @@ class FaqController extends Controller
     /**
      * Get FAQs by category.
      */
-    public function byCategory($category)
+    public function byCategory(string $category): AnonymousResourceCollection
     {
         $faqs = Faq::active()
             ->category($category)
@@ -168,3 +141,4 @@ class FaqController extends Controller
         return FaqResource::collection($faqs);
     }
 }
+

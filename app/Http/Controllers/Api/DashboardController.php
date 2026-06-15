@@ -20,27 +20,19 @@ class DashboardController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        try {
-            $user = $request->user();
+        $user = $request->user();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Dashboard data retrieved successfully',
-                'data' => [
-                    'overview' => $this->getOverview($user),
-                    'shopping_insights' => $this->getShoppingInsights($user),
-                    'category_distribution' => $this->getCategoryDistribution($user),
-                    'recent_orders' => $this->getRecentOrders($user),
-                    'top_purchases' => $this->getTopPurchases($user),
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve dashboard data',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Dashboard data retrieved successfully',
+            'data' => [
+                'overview' => $this->getOverview($user),
+                'shopping_insights' => $this->getShoppingInsights($user),
+                'category_distribution' => $this->getCategoryDistribution($user),
+                'recent_orders' => $this->getRecentOrders($user),
+                'top_purchases' => $this->getTopPurchases($user),
+            ],
+        ]);
     }
 
     /**

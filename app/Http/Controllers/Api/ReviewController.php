@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Review\StoreReviewAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Http\Resources\ReviewResource;
-use App\Models\Review;
 use App\Models\Meal;
+use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -65,23 +66,9 @@ class ReviewController extends Controller
      */
     public function store(StoreReviewRequest $request): JsonResponse
     {
-        // Check if user has already reviewed this meal
-        if (Review::hasUserReviewed(Auth::id(), $request->meal_id)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already reviewed this meal'
-            ], 400);
-        }
+        $meal = Meal::findOrFail($request->meal_id);
         
-        // Create review
-        $review = Review::create([
-            'user_id' => Auth::id(),
-            'meal_id' => $request->meal_id,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-            'images' => $request->images,
-            'is_approved' => false, // Admin approval required
-        ]);
+        $review = StoreReviewAction::run($request->user(), $meal, $request->validated());
         
         return response()->json([
             'success' => true,
@@ -93,9 +80,9 @@ class ReviewController extends Controller
     /**
      * Get single review
      */
-    public function show($id): JsonResponse
+    public function show(Review $review): JsonResponse
     {
-        $review = Review::with(['user', 'meal'])->findOrFail($id);
+        $review->load(['user', 'meal']);
         
         return response()->json([
             'success' => true,
@@ -106,17 +93,9 @@ class ReviewController extends Controller
     /**
      * Update review (only by owner or admin)
      */
-    public function update(UpdateReviewRequest $request, $id): JsonResponse
+    public function update(UpdateReviewRequest $request, Review $review): JsonResponse
     {
-        $review = Review::findOrFail($id);
-        
-        // Check authorization (owner or admin)
-        if (Auth::id() !== $review->user_id && !Auth::user()->is_admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
+        $this->authorizeOwnerOrAdmin($request, $review);
         
         $review->update($request->validated());
         
@@ -130,17 +109,9 @@ class ReviewController extends Controller
     /**
      * Delete review (only by owner or admin)
      */
-    public function destroy($id): JsonResponse
+    public function destroy(Request $request, Review $review): JsonResponse
     {
-        $review = Review::findOrFail($id);
-        
-        // Check authorization (owner or admin)
-        if (Auth::id() !== $review->user_id && !Auth::user()->is_admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
+        $this->authorizeOwnerOrAdmin($request, $review);
         
         $review->delete();
         
@@ -153,18 +124,16 @@ class ReviewController extends Controller
     /**
      * Get reviews for a specific meal
      */
-    public function getMealReviews($mealId, Request $request): JsonResponse
+    public function getMealReviews(Meal $meal, Request $request): JsonResponse
     {
-        $meal = Meal::findOrFail($mealId);
-        
         $reviews = Review::with('user')
-            ->where('meal_id', $mealId)
+            ->where('meal_id', $meal->id)
             ->approved()
             ->latest()
             ->paginate($request->input('per_page', 10));
         
-        $averageRating = Review::getAverageRating($mealId);
-        $totalReviews = Review::getTotalReviews($mealId);
+        $averageRating = Review::getAverageRating($meal->id);
+        $totalReviews = Review::getTotalReviews($meal->id);
         
         return response()->json([
             'success' => true,
@@ -189,7 +158,7 @@ class ReviewController extends Controller
      */
     public function getUserReviews(Request $request): JsonResponse
     {
-        $userId = $request->user_id ?? Auth::id();
+        $userId = $request->user_id ?? $request->user()->id;
         
         $reviews = Review::with('meal')
             ->where('user_id', $userId)
@@ -211,9 +180,9 @@ class ReviewController extends Controller
     /**
      * Get review statistics for a meal
      */
-    public function getMealReviewStats($mealId): JsonResponse
+    public function getMealReviewStats(Meal $meal): JsonResponse
     {
-        $stats = Review::where('meal_id', $mealId)
+        $stats = Review::where('meal_id', $meal->id)
             ->approved()
             ->selectRaw('
                 COUNT(*) as total_reviews,
@@ -241,4 +210,14 @@ class ReviewController extends Controller
             ]
         ]);
     }
-}
+
+    /**
+     * Authorize owner or admin.
+     */
+    private function authorizeOwnerOrAdmin(Request $request, Review $review): void
+    {
+        if ($request->user()->id !== $review->user_id && !$request->user()->is_admin) {
+            abort(403, 'Unauthorized');
+        }
+    }
+}

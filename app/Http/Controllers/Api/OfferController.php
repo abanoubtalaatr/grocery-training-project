@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Offer;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\OfferResource;
+use App\Http\Requests\ValidateOfferRequest;
+use App\Http\Resources\OfferResource;
+use App\Models\Offer;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class OfferController extends Controller
 {
-    // Get all active offers
-    public function index(Request $request)
+    /**
+     * Get all active offers
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = Offer::active();
         
@@ -33,7 +38,7 @@ class OfferController extends Controller
         // Search by title or code
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('code', 'like', "%{$search}%");
             });
@@ -51,8 +56,10 @@ class OfferController extends Controller
         return OfferResource::collection($offers);
     }
 
-    // Get featured offers
-    public function featured()
+    /**
+     * Get featured offers
+     */
+    public function featured(): AnonymousResourceCollection
     {
         $offers = Offer::featured()
             ->orderBy('created_at', 'desc')
@@ -62,22 +69,19 @@ class OfferController extends Controller
         return OfferResource::collection($offers);
     }
 
-    // Get offer by code
-    public function showByCode($code)
+    /**
+     * Get offer by code (Route Model Binding via {offer:code})
+     */
+    public function showByCode(Offer $offer): OfferResource
     {
-        $offer = Offer::where('code', $code)->firstOrFail();
-        
         return new OfferResource($offer);
     }
 
-    // Validate offer code
-    public function validateOffer(Request $request)
+    /**
+     * Validate offer code
+     */
+    public function validateOffer(ValidateOfferRequest $request): JsonResponse
     {
-        $request->validate([
-            'code' => 'required|string',
-            'amount' => 'nullable|numeric|min:0',
-        ]);
-        
         $offer = Offer::where('code', $request->code)->first();
         
         if (!$offer) {
@@ -109,4 +113,4 @@ class OfferController extends Controller
             'message' => $message,
         ]);
     }
-}
+}

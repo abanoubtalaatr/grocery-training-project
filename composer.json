@@ -21,6 +21,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10",
+        "lorisleiva/laravel-actions": "^2.10",
         "stripe/stripe-php": "^19.1"
     },
     "require-dev": {
