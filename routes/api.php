@@ -1,5 +1,7 @@
 <?php
 
+use  App\Jobs\SendInvoiceEmailJob;
+use  App\Jobs\SendToInventroyJob;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\AuthController;
@@ -9,9 +11,10 @@ use App\Http\Controllers\Api\ChatbotController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DataManagementController;
-use App\Http\Controllers\Api\LoyaltyController;
+use App\Http\Controllers\Api\FaqController as ApiFaqController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\MealController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotificationSettingsController;
@@ -23,14 +26,18 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SmartListController;
 use App\Http\Controllers\Api\SpecialNoteController;
 use App\Http\Controllers\Api\StaticPageController;
-use App\Http\Controllers\Api\SupportController;
-use App\Http\Controllers\Api\UserAppSettingsController;
 use App\Http\Controllers\Api\StripeCheckoutController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\UserAppSettingsController;
+use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use Illuminate\Support\Facades\Route;
+
+use App\Jobs\SendInvoiceJob;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,8 +49,35 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 |
 */
 
+
+
+Route::get('/send-email', function () {
+    SendInvoiceEmailJob::dispatch();
+
+    return response()->json(['message' => 'Invoice email dispatched']);
+});
+
+    
+Route::get('/send-invoice', function () {
+
+sendInvoiceJob::dispatch(
+
+    'samiralsaied07@gmail.com',
+);
+
+    return response()->json([
+        'message' => 'Job queued successfully'
+    ]);
+});
+
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+         Route::get('/categories', [ApiCategoryController::class, 'index']);
+    Route::get('/faqs', [ApiFaqController::class, 'index']);
+
+
+
+
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
