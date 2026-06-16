@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Chatbot;
+namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,7 +16,7 @@ class ChatbotResponseResource extends JsonResource
                 => $this['conversation_id'],
 
             'session_id'
-                => $this['conversation_id'],
+                => $this['session_id'],
 
             'question'
                 => $this['question'],

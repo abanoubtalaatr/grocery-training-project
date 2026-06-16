@@ -131,9 +131,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Favorites routes
     Route::prefix('favorites')->group(function () {
         Route::get('/', [FavoriteController::class, 'index']);
-        Route::post('/{mealId}/toggle', [FavoriteController::class, 'toggle']);
-        Route::get('/{mealId}/check', [FavoriteController::class, 'check']);
-        Route::delete('/{mealId}', [FavoriteController::class, 'remove']);
+        Route::get('/{mealId}', [FavoriteController::class, 'show']);
+        Route::post('/{mealId}', [FavoriteController::class, 'store']);
+        Route::delete('/{mealId}', [FavoriteController::class, 'destroy']);
     });
 
     // Chatbot routes
@@ -229,7 +229,7 @@ Route::prefix('subcategories')->group(function () {
     Route::get('/{id}', [SubcategoryController::class, 'show']);
     Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
 });
-Route::get('/faqs', [FaqController::class, 'index']);
+Route::apiResource('faqs', FaqController::class);
 Route::get('/pages', [StaticPageController::class, 'index']);
 Route::get('/pages/slug/{slug}', [StaticPageController::class, 'showBySlug']);
 Route::get('/pages/important', [StaticPageController::class, 'importantPages']);

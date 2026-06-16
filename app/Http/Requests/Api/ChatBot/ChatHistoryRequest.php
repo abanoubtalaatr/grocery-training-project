@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Chatbot;
+namespace App\Http\Requests\Api\ChatBot;
 
 use Illuminate\Foundation\Http\FormRequest;
 
