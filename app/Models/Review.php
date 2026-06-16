@@ -9,7 +9,7 @@ use App\Models\Concerns\Filterable;
 
 class Review extends Model
 {
-    use HasFactory;
+    use HasFactory, Filterable;
 
     protected $fillable = [
         'user_id',

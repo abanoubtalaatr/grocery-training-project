@@ -8,11 +8,23 @@ use Illuminate\Http\Request;
 trait Filterable
 {
 
+    //new 
+    
     public function scopeFilter(Builder $query, Request $request): Builder
     {
-        $static = self::resolveFilterClass();
-        
-        return (new $static($request))->apply($query);
+        $filterClass = self::resolveFilterClass();
+
+        // If the specific filter class does not exist, return the original query.
+        if (!class_exists($filterClass)) {
+            return $query;
+        }
+
+        $filter = new $filterClass($request);
+        if (method_exists($filter, 'apply')) {
+            return $filter->apply($query);
+        }
+
+        return $query;
     }
 
     public static function resolveFilterClass(): string

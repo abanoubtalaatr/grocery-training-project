@@ -10,6 +10,7 @@ use App\Models\Concerns\Filterable;
 
 class Category extends Model
 {
+
     use HasFactory, SoftDeletes,Filterable;
 
     /** Fallback when no image is stored (API always exposes a usable URL). */

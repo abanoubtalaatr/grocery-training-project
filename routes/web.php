@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\MealController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +17,22 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::prefix("auth")->group(function(){
 
+    Route::view('/login', 'auth.login')->name('login');
+    Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('auth.login');
+    }
+);
+
+Route::prefix('admins')->middleware('auth')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'dashboard'])->name('admins.dashboard');
+    Route::delete('/categories/mass-destroy', [CategoryController::class, 'massDestroy'])->name('admins.categories.mass-destroy');
+    Route::resource('categories', CategoryController::class)->names('admins.categories');
+    Route::delete('/orders/mass-destroy', [OrderController::class, 'massDestroy'])->name('admins.orders.mass-destroy');
+    Route::resource('orders', OrderController::class)->names('admins.orders');
+    Route::delete('/meals/mass-destroy', [MealController::class, 'massDestroy'])->name('admins.meals.mass-destroy');
+    Route::resource('meals', MealController::class)->names('admins.meals');
+});
 Route::get('/', function () {
     return response()->json([
         'name' => config('app.name'),
