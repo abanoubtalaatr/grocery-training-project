@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Meal;
 use App\Services\FrequencyService;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use Throwable;
 
 class MealController extends Controller
 {
+    use ResponseApi;
     /**
      * Get meals the authenticated user orders most often (personalized by frequency type).
      * Query param: frequency_type = daily|weekly|monthly (default: weekly).
@@ -26,10 +28,7 @@ class MealController extends Controller
 
             $user = $request->user();
             if ($user === null) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Authentication required to view frequency meals.',
-                ], 401);
+                return $this->failed('Authentication required to view frequency meals.', status: 401);
             }
 
             $subcategoryId = $request->input('subcategory_id');
@@ -106,11 +105,7 @@ class MealController extends Controller
     {
         $brands = Meal::distinct()->pluck('brand');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brands retrieved successfully',
-            'data' => $brands,
-        ]);
+        return $this->success('Brands retrieved successfully', $brands);
     }
 
     public function slider(Request $request)
@@ -139,11 +134,9 @@ class MealController extends Controller
                 ];
             });
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Today\'s meals retrieved successfully',
-            'data' => $meals,
-        ]);
+         return $this->success('Today\'s meals retrieved successfully',$meals);
+           
+       
     }
 
     public function bestSells(Request $request)
@@ -154,11 +147,9 @@ class MealController extends Controller
             ->take(10)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Best sells retrieved successfully',
-            'data' => $meals,
-        ]);
+        
+         return $this->success('Best sells retrieved successfully',$meals);
+        
     }
 
     public function newProducts(Request $request)
@@ -170,17 +161,10 @@ class MealController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'New products retrieved successfully',
-                'data' => $meals,
-            ]);
+              return $this->success('New products retrieved successfully',$meals);
+             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve meals',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed('Failed to retrieve meals', $e->getMessage(), 500);
         }
     }
 

@@ -5,18 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
 use App\Models\Meal;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class FavoriteController extends Controller
 {
+    use ResponseApi;
     /**
      * Get all user's favorite meals
      */
     public function index(Request $request): JsonResponse
     {
-        try {
+      
             $user = $request->user();
             
             $favorites = $user->favorites()
@@ -66,30 +68,17 @@ class FavoriteController extends Controller
                     ];
                 });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Favorites retrieved successfully',
-                'data' => $favorites,
-                'total_count' => $favorites->count(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve favorites',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return $this->success( 'Favorites retrieved successfully', $favorites);
+       
     }
 
     /**
      * Toggle favorite status for a meal
      */
-    public function toggle(Request $request, string $mealId): JsonResponse
+    public function toggle(Request $request, Meal $meal): JsonResponse
     {
         try {
             $user = $request->user();
-            $meal = Meal::findOrFail($mealId);
-
             DB::beginTransaction();
 
             $favorite = $user->favorites()->where('meal_id', $meal->id)->first();
@@ -110,98 +99,49 @@ class FavoriteController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'data' => [
+            return $this->success( $message,
+                [
                     'meal_id' => $meal->id,
                     'is_favorited' => $isFavorited,
                 ],
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Meal not found',
-            ], 404);
-        } catch (\Exception $e) {
+            );
+
+        } 
+        catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to toggle favorite',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed('Failed to toggle favorite', $e->getMessage(), 500);
         }
     }
 
     /**
      * Check if a meal is favorited
      */
-    public function check(Request $request, string $mealId): JsonResponse
+    public function check(Request $request, Meal $meal): JsonResponse
     {
         try {
-            $user = $request->user();
-            $meal = Meal::findOrFail($mealId);
+            
+            $isFavorited = $request->user->favorites()->where('meal_id', $meal->id)->exists();
 
-            $isFavorited = $user->favorites()->where('meal_id', $meal->id)->exists();
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'meal_id' => $meal->id,
-                    'is_favorited' => $isFavorited,
-                ],
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Meal not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to check favorite status',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->success(data: ['meal_id' => $meal->id,'is_favorited' => $isFavorited,]);
+        }  catch (\Exception $e) {
+            return $this->failed( 'Failed to check favorite status', $e->getMessage(),500);
         }
     }
 
     /**
      * Remove meal from favorites
      */
-    public function remove(Request $request, string $mealId): JsonResponse
+    public function remove(Request $request, Meal $meal): JsonResponse
     {
-        try {
-            $user = $request->user();
-            $meal = Meal::findOrFail($mealId);
-
-            $deleted = $user->favorites()->where('meal_id', $meal->id)->delete();
+     
+            $deleted = $request->user->favorites()->where('meal_id', $meal->id)->delete();
 
             if ($deleted) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Removed from favorites',
-                    'data' => [
-                        'meal_id' => $meal->id,
-                        'is_favorited' => false,
-                    ],
-                ]);
+                return $this->success('Removed from favorites',['meal_id' => $meal->id,'is_favorited' => false, ],);
+              
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Meal was not in favorites',
-                ], 404);
+                return $this->failed('Meal was not in favorites', status:404);
             }
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Meal not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to remove from favorites',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        
     }
 }

@@ -141,7 +141,7 @@ class FaqController extends Controller
 
     /**
      * Get all FAQ categories.
-     */
+     */mm
     public function categories()
     {
         $categories = Faq::active()

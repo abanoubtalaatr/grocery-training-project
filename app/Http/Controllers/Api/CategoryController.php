@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
+;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\CategoryResourse;
 use App\Models\Category;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    use ResponseApi;
     /**
      * Get all categories
      */
     public function index(Request $request): JsonResponse
     {
-        try {
+    
             $categories = Category::active()
                 ->ordered()
                 ->withCount('meals')
@@ -32,18 +36,8 @@ class CategoryController extends Controller
                     ];
                 });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Categories retrieved successfully',
-                'data' => $categories,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve categories',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return $this->success('Categories retrieved successfully',CategoryResourse::collection($categories));
+       
     }
 
     /**
