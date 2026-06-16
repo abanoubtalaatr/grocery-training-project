@@ -27,7 +27,7 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $orders = $this->orderService->getOrders($request->user());
+        $orders = $this->orderService->getOrders($request->user(), $request);
         $formattedOrders = $orders->map(fn($order) => $this->orderService->formatOrder($order));
 
         return self::collectionResponse('Orders retrieved successfully', $formattedOrders);

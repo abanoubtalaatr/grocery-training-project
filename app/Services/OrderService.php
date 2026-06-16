@@ -13,11 +13,16 @@ use Illuminate\Support\Collection;
 
 class OrderService
 {
-    public function getOrders(User $user): Collection
+    public function getOrders(User $user, $request = null): Collection
     {
-        return Order::with(['items.meal.category', 'items.meal.subcategory', 'address'])
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
+        $query = Order::with(['items.meal.category', 'items.meal.subcategory', 'address'])
+            ->where('user_id', $user->id);
+
+        if ($request) {
+            $query->filter($request);
+        }
+
+        return $query->orderBy('created_at', 'desc')
             ->get();
     }
 
