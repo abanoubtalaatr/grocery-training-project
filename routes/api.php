@@ -110,11 +110,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::prefix('addresses')->group(function () {
-        Route::get('/', [AddressController::class, 'index']);
-        Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
+        Route::apiResource('/', AddressController::class);
         Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
     });
 
@@ -251,8 +247,7 @@ Route::prefix('offers')->group(function () {
     Route::get('/{code}', [OfferController::class, 'showByCode']);
 });
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/{id}', [CategoryController::class, 'show']);
+    Route::apiResource('/', CategoryController::class);
     Route::get('/{id}/meals', [CategoryController::class, 'meals']);
 });
 
