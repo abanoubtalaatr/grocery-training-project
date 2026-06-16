@@ -55,7 +55,7 @@ use App\Http\Controllers\Api\SubcategoryMealController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\TodayDealController;
 use App\Http\Controllers\Api\UserAppSettingsController;
-use App\Http\Controllers\Api\V1\DefaultAddressController;
+use App\Http\Controllers\Api\SetDefaultAddressController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use App\Jobs\SendToEmailJob;
 use Illuminate\Support\Facades\Route;
@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::apiResource('addresses', AddressController::class);
-    Route::post('addresses/{address}/set-default', DefaultAddressController::class)->name('addresses.set-default');
+    Route::post('addresses/{address}/set-default', SetDefaultAddressController::class)->name('addresses.set-default');
 
     // Smart List routes
     Route::prefix('smart-lists')->group(function () {
