@@ -3,6 +3,25 @@
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
+use App\Jobs\SendInvoiceJob;
+
+Route::get('/test-invoice', function () {
+    $orderData = [
+        'name'     => 'Test Customer',
+        'email'    => 'test@example.com',
+        'order_id' => 1,
+        'date'     => now()->format('Y-m-d'),
+        'items'    => [
+            ['name' => 'Apple', 'quantity' => 2, 'price' => 5.00],
+            ['name' => 'Banana', 'quantity' => 3, 'price' => 3.00],
+        ],
+        'total' => 19.00,
+    ];
+
+    SendInvoiceJob::dispatch($orderData);
+
+    return 'Invoice job dispatched successfully!';
+});
 
 /*
 |--------------------------------------------------------------------------

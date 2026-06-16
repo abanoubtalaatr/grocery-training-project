@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AddressResource;
 use App\Models\Address;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
 class AddressController extends Controller
 {
     /**
      * Get all user addresses
      */
-    public function index(Request $request): JsonResponse
+public function index(Request $request): JsonResponse
     {
         if ($request->allFiles() !== []) {
             return response()->json([
@@ -30,15 +30,12 @@ class AddressController extends Controller
             $addresses = $user->addresses()
                 ->orderBy('is_default', 'desc')
                 ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($address) {
-                    return $this->formatAddress($address);
-                });
+                ->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Addresses retrieved successfully',
-                'data' => $addresses,
+                'data' => AddressResource::collection($addresses),
                 'total_count' => $addresses->count(),
             ]);
         } catch (\Exception $e) {
@@ -62,7 +59,7 @@ class AddressController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Address retrieved successfully',
-                'data' => $this->formatAddress($address),
+                'data' => new AddressResource($address),
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -139,10 +136,10 @@ class AddressController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Address created successfully',
-                'data' => $this->formatAddress($address),
-            ], 201);
+    'success' => true,
+    'message' => 'Address created successfully',
+    'data' => new AddressResource($address),
+], 201);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -203,10 +200,10 @@ class AddressController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Address updated successfully',
-                'data' => $this->formatAddress($address->fresh()),
-            ]);
+    'success' => true,
+    'message' => 'Address updated successfully',
+    'data' => new AddressResource($address->fresh()),
+]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -281,7 +278,7 @@ class AddressController extends Controller
                     'success' => true,
                     'message' => 'This address is already your default.',
                     'already_default' => true,
-                    'data' => $this->formatAddress($address),
+                    'data' => new AddressResource($address->fresh()),
                 ]);
             }
 
@@ -295,7 +292,7 @@ class AddressController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Default address updated successfully',
-                'data' => $this->formatAddress($address->fresh()),
+                'data' => new AddressResource($address->fresh()),
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
@@ -311,36 +308,5 @@ class AddressController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Format address data for response
-     */
-    private function formatAddress(Address $address): array
-    {
-        return [
-            'id' => $address->id,
-            'label' => $address->label,
-            'full_name' => $address->full_name,
-            'phone' => $address->phone,
-            'country_code' => $address->country_code,
-            'formatted_phone' => $address->formatted_phone,
-            'street_address' => $address->street_address,
-            'building_number' => $address->building_number,
-            'floor' => $address->floor,
-            'apartment' => $address->apartment,
-            'landmark' => $address->landmark,
-            'city' => $address->city,
-            'state' => $address->state,
-            'postal_code' => $address->postal_code,
-            'country' => $address->country,
-            'notes' => $address->notes,
-            'is_default' => $address->is_default,
-            'latitude' => $address->latitude,
-            'longitude' => $address->longitude,
-            'full_address' => $address->full_address,
-            'created_at' => $address->created_at,
-            'updated_at' => $address->updated_at,
-        ];
     }
 }
