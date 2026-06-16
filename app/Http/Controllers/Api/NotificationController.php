@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Meal;
 use App\Models\Order;
-use App\Models\User;
+use App\Traits\V1\ApiResponse;
+use App\Traits\V1\ApiResponseCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
@@ -16,6 +17,8 @@ use Throwable;
 
 class NotificationController extends Controller
 {
+    use ApiResponse, ApiResponseCollection;
+
     /**
      * Get all notifications for authenticated user
      */
@@ -25,21 +28,17 @@ class NotificationController extends Controller
         $perPage = max(1, min(100, (int) $request->get('per_page', 15)));
 
         $notifications = $this->buildNotificationsQuery($request)->paginate($perPage);
-        $transformed = $notifications->getCollection()->map(fn ($n) => $this->transformNotification($n))->values();
+        $transformed = $notifications->getCollection()->map(fn($n) => $this->transformNotification($n))->values();
         $notifications->setCollection($transformed);
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'notifications' => $notifications->items(),
-                'unread_count' => $user->unreadNotifications()->count(),
-                'total_count' => $user->notifications()->count(),
-                'pagination' => [
-                    'current_page' => $notifications->currentPage(),
-                    'last_page' => $notifications->lastPage(),
-                    'per_page' => $notifications->perPage(),
-                    'total' => $notifications->total(),
-                ],
+        return self::collectionResponse('Notifications retrieved successfully', $notifications->items(), [
+            'unread_count' => $user->unreadNotifications()->count(),
+            'total_count' => $user->notifications()->count(),
+            'pagination' => [
+                'current_page' => $notifications->currentPage(),
+                'last_page' => $notifications->lastPage(),
+                'per_page' => $notifications->perPage(),
+                'total' => $notifications->total(),
             ],
         ]);
     }
@@ -52,10 +51,7 @@ class NotificationController extends Controller
         try {
             $user = Auth::user();
             if ($user === null) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthenticated',
-                ], 401);
+                return self::errorResponse('Unauthenticated', 403);
             }
 
             $perPage = max(1, min(100, (int) $request->get('per_page', 15)));
@@ -128,18 +124,14 @@ class NotificationController extends Controller
 
             $notifications->setCollection($transformed);
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'notifications' => $notifications->items(),
-                    'unread_count' => $user->unreadNotifications()->count(),
-                    'total_count' => $user->notifications()->count(),
-                    'pagination' => [
-                        'current_page' => $notifications->currentPage(),
-                        'last_page' => $notifications->lastPage(),
-                        'per_page' => $notifications->perPage(),
-                        'total' => $notifications->total(),
-                    ],
+            return self::collectionResponse('Notifications with resources retrieved successfully', $transformed, [
+                'unread_count' => $user->unreadNotifications()->count(),
+                'total_count' => $user->notifications()->count(),
+                'pagination' => [
+                    'current_page' => $notifications->currentPage(),
+                    'last_page' => $notifications->lastPage(),
+                    'per_page' => $notifications->perPage(),
+                    'total' => $notifications->total(),
                 ],
             ]);
         } catch (Throwable $e) {
@@ -148,11 +140,11 @@ class NotificationController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to load notifications',
-                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
-            ], 500);
+            return self::errorResponse(
+                'Failed to load notifications',
+                config('app.debug') ? $e->getMessage() : null,
+                500
+            );
         }
     }
 
@@ -248,16 +240,13 @@ class NotificationController extends Controller
 
         $last = $allNotifications->latest()->first();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total' => $total,
-                'unread' => $unread,
-                'read' => max(0, $total - $unread),
-                'by_type' => $typeCounts,
-                'recent_types' => $recentTypes,
-                'last_notification_at' => $last?->created_at?->toIso8601String(),
-            ],
+        return self::successResponse('Notification statistics retrieved successfully', [
+            'total' => $total,
+            'unread' => $unread,
+            'read' => max(0, $total - $unread),
+            'by_type' => $typeCounts,
+            'recent_types' => $recentTypes,
+            'last_notification_at' => $last?->created_at?->toIso8601String(),
         ]);
     }
 
@@ -274,10 +263,10 @@ class NotificationController extends Controller
             $notification->markAsRead();
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $this->transformNotification($notification, true),
-        ]);
+        return self::successResponse(
+            'Notification retrieved successfully',
+            $this->transformNotification($notification, true)
+        );
     }
 
     /**
@@ -291,17 +280,13 @@ class NotificationController extends Controller
         if (! $notification->read_at) {
             $notification->markAsRead();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification marked as read',
-                'data' => $this->transformNotification($notification),
-            ]);
+            return self::successResponse(
+                'Notification marked as read',
+                $this->transformNotification($notification)
+            );
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Notification is already read',
-        ], 400);
+        return self::errorResponse('Notification is already read', null, 400);
     }
 
     /**
@@ -315,17 +300,13 @@ class NotificationController extends Controller
         if ($notification->read_at) {
             $notification->markAsUnread();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification marked as unread',
-                'data' => $this->transformNotification($notification),
-            ]);
+            return self::successResponse(
+                'Notification marked as unread',
+                $this->transformNotification($notification)
+            );
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Notification is already unread',
-        ], 400);
+        return self::errorResponse('Notification is already unread', null, 400);
     }
 
     /**
@@ -339,16 +320,10 @@ class NotificationController extends Controller
         if ($unreadCount > 0) {
             $user->unreadNotifications()->update(['read_at' => now()]);
 
-            return response()->json([
-                'success' => true,
-                'message' => "{$unreadCount} notifications marked as read",
-            ]);
+            return self::successResponse("{$unreadCount} notifications marked as read");
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'No unread notifications',
-        ], 400);
+        return self::errorResponse('No unread notifications', null, 400);
     }
 
     /**
@@ -361,10 +336,7 @@ class NotificationController extends Controller
 
         $notification->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification deleted successfully',
-        ]);
+        return self::successResponse('Notification deleted successfully');
     }
 
     /**
@@ -378,10 +350,7 @@ class NotificationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
         $user = Auth::user();
@@ -389,10 +358,7 @@ class NotificationController extends Controller
             ->whereIn('id', $request->ids)
             ->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => "{$deletedCount} notifications deleted successfully",
-        ]);
+        return self::successResponse("{$deletedCount} notifications deleted successfully");
     }
 
     /**
@@ -406,17 +372,11 @@ class NotificationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+            return self::errorResponse('Validation failed', $validator->errors(), 422);
         }
 
         if (! $request->confirmation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please confirm you want to clear all notifications',
-            ], 400);
+            return self::errorResponse('Please confirm you want to clear all notifications', null, 400);
         }
 
         $user = Auth::user();
@@ -443,10 +403,7 @@ class NotificationController extends Controller
                 break;
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-        ]);
+        return self::successResponse($message);
     }
 
     /**
@@ -465,14 +422,10 @@ class NotificationController extends Controller
             return $this->transformNotification($notification);
         });
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'type' => $type,
-                'notifications' => $transformedNotifications,
-                'total' => $notifications->total(),
-                'unread' => $notifications->whereNull('read_at')->count(),
-            ],
+        return self::collectionResponse('Notifications by type retrieved successfully', $transformedNotifications, [
+            'type' => $type,
+            'total' => $notifications->total(),
+            'unread' => $notifications->whereNull('read_at')->count(),
         ]);
     }
 
@@ -484,12 +437,9 @@ class NotificationController extends Controller
         $user = Auth::user();
         $count = $user->unreadNotifications()->count();
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'count' => $count,
-                'has_unread' => $count > 0,
-            ],
+        return self::successResponse('Unread notifications count retrieved', [
+            'count' => $count,
+            'has_unread' => $count > 0,
         ]);
     }
 
@@ -510,13 +460,9 @@ class NotificationController extends Controller
             return $this->transformNotification($notification);
         });
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'notifications' => $transformedNotifications,
-                'total_recent' => $recentNotifications->count(),
-                'unread_recent' => $recentNotifications->whereNull('read_at')->count(),
-            ],
+        return self::collectionResponse('Recent notifications retrieved successfully', $transformedNotifications, [
+            'total_recent' => $recentNotifications->count(),
+            'unread_recent' => $recentNotifications->whereNull('read_at')->count(),
         ]);
     }
 

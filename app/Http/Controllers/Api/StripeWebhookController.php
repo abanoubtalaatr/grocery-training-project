@@ -18,6 +18,7 @@ class StripeWebhookController extends Controller
 
     public function handle(Request $request): Response
     {
+        
         $secret = config('services.stripe.webhook_secret');
         if (! is_string($secret) || $secret === '') {
             return response('Webhook not configured.', 500);

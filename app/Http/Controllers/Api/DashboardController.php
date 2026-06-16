@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Meal;
-use App\Models\Category;
+use App\Traits\V1\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    use ApiResponse;
+
     /**
      * Get dashboard statistics and insights.
      */
@@ -23,23 +23,21 @@ class DashboardController extends Controller
         try {
             $user = $request->user();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Dashboard data retrieved successfully',
-                'data' => [
-                    'overview' => $this->getOverview($user),
-                    'shopping_insights' => $this->getShoppingInsights($user),
-                    'category_distribution' => $this->getCategoryDistribution($user),
-                    'recent_orders' => $this->getRecentOrders($user),
-                    'top_purchases' => $this->getTopPurchases($user),
-                ],
-            ]);
+            $data = [
+                'overview' => $this->getOverview($user),
+                'shopping_insights' => $this->getShoppingInsights($user),
+                'category_distribution' => $this->getCategoryDistribution($user),
+                'recent_orders' => $this->getRecentOrders($user),
+                'top_purchases' => $this->getTopPurchases($user),
+            ];
+
+            return self::successResponse('Dashboard data retrieved successfully', $data);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve dashboard data',
-                'error' => $e->getMessage(),
-            ], 500);
+            return self::errorResponse(
+                'Failed to retrieve dashboard data',
+                $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -157,9 +155,9 @@ class DashboardController extends Controller
 
         // Also calculate savings from meal discount prices
         $mealSavings = OrderItem::whereHas('order', function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->where('status', '!=', 'cancelled');
-            })
+            $query->where('user_id', $user->id)
+                ->where('status', '!=', 'cancelled');
+        })
             ->with('meal')
             ->get()
             ->sum(function ($item) {
@@ -194,9 +192,9 @@ class DashboardController extends Controller
     private function getCategoryDistribution($user): array
     {
         $orderItems = OrderItem::whereHas('order', function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->where('status', '!=', 'cancelled');
-            })
+            $query->where('user_id', $user->id)
+                ->where('status', '!=', 'cancelled');
+        })
             ->with('meal.category')
             ->get();
 
@@ -272,9 +270,9 @@ class DashboardController extends Controller
     private function getTopPurchases($user, int $limit = 10): array
     {
         $topMeals = OrderItem::whereHas('order', function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                      ->where('status', '!=', 'cancelled');
-            })
+            $query->where('user_id', $user->id)
+                ->where('status', '!=', 'cancelled');
+        })
             ->with('meal.category', 'meal.subcategory')
             ->select('meal_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(subtotal) as total_spent'))
             ->groupBy('meal_id')

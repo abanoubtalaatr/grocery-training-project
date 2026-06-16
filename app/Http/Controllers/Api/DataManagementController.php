@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Services\UserAppSettingsService;
+use App\Traits\V1\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -20,7 +21,7 @@ class DataManagementController extends Controller
     {
         $user = $request->user();
         $payload = $this->settingsService->buildDataExport($user);
-        $filename = 'grocery-user-data-'.$user->id.'-'.now()->format('Y-m-d').'.json';
+        $filename = 'grocery-user-data-' . $user->id . '-' . now()->format('Y-m-d') . '.json';
 
         return response()->streamDownload(function () use ($payload) {
             echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -34,9 +35,6 @@ class DataManagementController extends Controller
         $user = $request->user();
         $this->authService->deleteAccount($user);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Account deleted successfully',
-        ]);
+        return ApiResponse::successResponse('Account deleted successfully', 200);
     }
 }
