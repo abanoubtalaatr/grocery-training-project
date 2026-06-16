@@ -2,212 +2,46 @@
 
 namespace App\Http\Controllers\Api;
 
-use Stripe\Stripe;
-use App\Models\Cart;
-use App\Models\Meal;
-use App\Models\Order;
-use App\Models\Address;
-use App\Models\OrderItem;
-use App\Models\OrderNote;
-use Stripe\PaymentIntent;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
+use App\Actions\StoreOrder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
-use App\Services\ShippingService;
+use App\Http\Resources\OrderResource;
+use App\Models\Order;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Stripe\PaymentIntent;
+use Stripe\Stripe;
 
 class OrderController extends Controller
 {
+    use ApiResponseTrait;
+
+    /**
+     * Get all user orders.
+     */
+    public function index(Request $request)
+    {
+        $orders = Order::query()->with(['items.meal.category', 'items.meal.subcategory', 'address'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return OrderResource::collection($orders);
+    }
 
     public function show(Request $request, Order $order)
     {
-        $order = $order->load(['items.meal', 'address']);
+        $order->load(['items.meal', 'address']);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order retrieved successfully',
-            'data' => $this->formatOrder($order),
-        ]);
+        return new OrderResource($order);
     }
-    
+
     /**
      * Create a new order.
      */
-    public function store(StoreOrderRequest $request): JsonResponse
+    public function store(StoreOrderRequest $request, StoreOrder $action): JsonResponse
     {
-        try {
-            $user = $request->user();
-            $validated = $request->validated();
-
-            // Get user's active cart
-            $cart = $user->activeCart()->with('items.meal')->first();
-
-            if (!$cart || $cart->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Your cart is empty. Please add items to your cart before placing an order.',
-                ], 400);
-            }
-
-            // Validate and process items from cart
-            $itemsResult = $this->validateAndProcessCartItems($cart->items);
-            if (!$itemsResult['success']) {
-                return response()->json($itemsResult['response'], 400);
-            }
-
-            $items = $itemsResult['items'];
-
-            // Calculate totals and shipping (use cart totals; add shipping for delivery)
-            $cart->calculateTotals();
-            $shippingService = app(ShippingService::class);
-            $shippingFee = $shippingService->calculateShippingFee((float) $cart->subtotal, $validated['delivery_type']);
-            $totals = [
-                'subtotal' => $cart->subtotal,
-                'tax' => $cart->tax,
-                'discount' => $cart->discount,
-                'shipping_fee' => $shippingFee,
-                'total' => (float) $cart->subtotal + (float) $cart->tax + $shippingFee,
-            ];
-            $total = $totals['total'];
-
-            // Validate amount matches cart total
-            // if (abs($total - $validated['amount']) > 0.01) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'message' => 'Amount mismatch. Please recalculate your order.',
-            //         'calculated_total' => $total,
-            //         'provided_amount' => $validated['amount'],
-            //     ], 400);
-            // }
-
-            DB::beginTransaction();
-
-            // $paymentResult = match ($validated['payment_method']) {
-            //     'stripe_checkout' => ['success' => true],
-            //     default => $this->processPayment($user, $validated, $total),
-            // };
-
-            // if (! $paymentResult['success']) {
-            //     DB::rollBack();
-
-            //     return response()->json($paymentResult['response'], 400);
-            // }
-
-            $stripePaymentIntentId = $paymentResult['stripe_payment_intent_id'] ?? null;
-
-            // Create order
-            $order = $this->createOrder($user, $validated, $totals['subtotal'], $totals, $stripePaymentIntentId);
-
-            // Create order items and update stock
-            $this->createOrderItems($order, $items);
-
-            // Clear user's active cart
-            $this->clearUserCart($user);
-
-            
-            if(isset($validated['special_note_id'])) {
-                OrderNote::create([
-                    'order_id' => $order->id,
-                    'special_note_id' => $validated['special_note_id'],
-                    'notes' => $validated['notes'] ?? null,
-                ]);
-            }
-            if(isset($validated['notes'])   ) {
-                OrderNote::create([
-                    'order_id' => $order->id,
-                    'special_note_id' => null,
-                    'notes' => $validated['notes'],
-                ]);
-            }
-            DB::commit();
-
-            $order->load(['items.meal', 'address']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Order created successfully',
-                'data' => $this->formatOrder($order),
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create order',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Validate and process order items from cart.
-     */
-    private function validateAndProcessCartItems($cartItems): array
-    {
-        $items = [];
-        $subtotal = 0;
-
-        foreach ($cartItems as $cartItem) {
-            $meal = $cartItem->meal;
-
-            if (!$meal) {
-                return [
-                    'success' => false,
-                    'response' => [
-                        'success' => false,
-                        'message' => 'One or more items in your cart are no longer available.',
-                    ],
-                ];
-            }
-
-            if (!$meal->is_available) {
-                return [
-                    'success' => false,
-                    'response' => [
-                        'success' => false,
-                        'message' => "Meal '{$meal->title}' is currently unavailable",
-                    ],
-                ];
-            }
-
-            if ($meal->stock_quantity < $cartItem->quantity) {
-                return [
-                    'success' => false,
-                    'response' => [
-                        'success' => false,
-                        'message' => "Only {$meal->stock_quantity} items available for '{$meal->title}'",
-                    ],
-                ];
-            }
-
-            $maxPerProduct = config('cart.max_quantity_per_product', 10);
-            if ($cartItem->quantity > $maxPerProduct) {
-                return [
-                    'success' => false,
-                    'response' => [
-                        'success' => false,
-                        'message' => "Maximum {$maxPerProduct} units per product allowed. Please reduce quantity for '{$meal->title}'.",
-                    ],
-                ];
-            }
-
-            // Use cart item pricing (already calculated)
-            $items[] = [
-                'meal' => $meal,
-                'quantity' => $cartItem->quantity,
-                'unit_price' => $cartItem->unit_price,
-                'discount_amount' => $cartItem->discount_amount,
-                'subtotal' => $cartItem->subtotal,
-            ];
-
-            $subtotal += $cartItem->subtotal;
-        }
-
-        return [
-            'success' => true,
-            'items' => $items,
-            'subtotal' => $subtotal,
-        ];
+        return $action->handle($request->validated(), auth()->user());
     }
 
     /**
@@ -238,7 +72,7 @@ class OrderController extends Controller
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        if (!$user->stripe_customer_id) {
+        if (! $user->stripe_customer_id) {
             return [
                 'success' => false,
                 'response' => [
@@ -250,7 +84,7 @@ class OrderController extends Controller
 
         try {
             $paymentIntent = PaymentIntent::create([
-                'amount' => (int)($total * 100),
+                'amount' => (int) ($total * 100),
                 'currency' => 'usd',
                 'customer' => $user->stripe_customer_id,
                 'payment_method' => $validated['payment_method_id'],
@@ -263,7 +97,7 @@ class OrderController extends Controller
                     'success' => false,
                     'response' => [
                         'success' => false,
-                        'message' => 'Payment failed: ' . $paymentIntent->status,
+                        'message' => 'Payment failed: '.$paymentIntent->status,
                     ],
                 ];
             }
@@ -277,96 +111,9 @@ class OrderController extends Controller
                 'success' => false,
                 'response' => [
                     'success' => false,
-                    'message' => 'Payment processing failed: ' . $e->getMessage(),
+                    'message' => 'Payment processing failed: '.$e->getMessage(),
                 ],
             ];
-        }
-    }
-
-    /**
-     * Create order record.
-     */
-    private function createOrder($user, array $validated, float $subtotal, array $totals, ?string $stripePaymentIntentId = null): Order
-    {
-        $isHostedStripe = $validated['payment_method'] === 'stripe_checkout';
-
-        return Order::create([
-            'user_id' => $user->id,
-            'address_id' => $validated['delivery_type'] === 'delivery' ? $validated['address_id'] : null,
-            'payment_method' => $validated['payment_method'],
-            'payment_method_id' => null,
-            'stripe_payment_intent_id' => $stripePaymentIntentId,
-            'delivery_type' => $validated['delivery_type'],
-            'status' => $isHostedStripe ? 'awaiting_payment' : 'placed',
-            'subtotal' => $subtotal,
-            'tax' => $totals['tax'],
-            'discount' => $totals['discount'],
-            'shipping_fee' => $totals['shipping_fee'],
-            'total' => $totals['total'],
-            'notes' => $validated['notes'] ?? null,
-            'placed_at' => $isHostedStripe ? null : now(),
-        ]);
-    }
-
-    /**
-     * Create order items and update stock.
-     */
-    private function createOrderItems(Order $order, array $items): void
-    {
-        foreach ($items as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'meal_id' => $item['meal']->id,
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'discount_amount' => $item['discount_amount'],
-                'subtotal' => $item['subtotal'],
-            ]);
-
-            $item['meal']->decrement('stock_quantity', $item['quantity']);
-        }
-    }
-
-    /**
-     * Clear user's active cart.
-     */
-    private function clearUserCart($user): void
-    {
-        $cart = $user->activeCart()->first();
-        if ($cart) {
-            $cart->items()->delete();
-            $cart->update(['status' => 'completed']);
-        }
-    }
-
-    /**
-     * Get all user orders.
-     */
-    public function index(Request $request): JsonResponse
-    {
-        try {
-            $user = $request->user();
-
-            $orders = Order::
-                with(['items.meal.category', 'items.meal.subcategory', 'address'])
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($order) {
-                    return $this->formatOrder($order);
-                });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Orders retrieved successfully',
-                'data' => $orders,
-                'total_count' => $orders->count(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve orders',
-                'error' => $e->getMessage(),
-            ], 500);
         }
     }
 
@@ -384,7 +131,7 @@ class OrderController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->first();
 
-            if (!$order) {
+            if (! $order) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No active order found',
@@ -396,7 +143,7 @@ class OrderController extends Controller
                     'success' => true,
                     'message' => 'Order is waiting for payment. Complete checkout to continue.',
                     'data' => [
-                        'order' => $this->formatOrder($order),
+                        'order' => new OrderResource($order),
                         'awaiting_payment' => true,
                         'tracking' => null,
                     ],
@@ -407,7 +154,7 @@ class OrderController extends Controller
                 'success' => true,
                 'message' => 'Order tracking retrieved successfully',
                 'data' => [
-                    'order' => $this->formatOrder($order),
+                    'order' => new OrderResource($order),
                     'tracking' => [
                         'position' => $order->status_position,
                         'status' => $order->status,
@@ -464,82 +211,5 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Format order data for response.
-     */
-    private function formatOrder(Order $order): array
-    {
-        return [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'payment_method' => $order->payment_method,
-            'stripe_payment_intent_id' => $order->stripe_payment_intent_id,
-            'delivery_type' => $order->delivery_type,
-            'status' => $order->status,
-            'status_position' => $order->status_position,
-            'status_description' => $order->status_description,
-            'items' => $order->items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'meal' => [
-                        'id' => $item->meal->id,
-                        'title' => $item->meal->title,
-                        'slug' => $item->meal->slug,
-                        'image_url' => $item->meal->image_url,
-                        ...$item->meal->getApiPriceAttributes(),
-                        'category' => $item->meal->category ? [
-                            'id' => $item->meal->category->id,
-                            'name' => $item->meal->category->name,
-                        ] : null,
-                        'subcategory' => $item->meal->subcategory ? [
-                            'id' => $item->meal->subcategory->id,
-                            'name' => $item->meal->subcategory->name,
-                        ] : null,
-                    ],
-                    'quantity' => $item->quantity,
-                    'unit_price' => (float) $item->unit_price,
-                    'discount_amount' => (float) $item->discount_amount,
-                    'subtotal' => (float) $item->subtotal,
-                ];
-            }),
-            'address' => $order->address ? [
-                'id' => $order->address->id,
-                'label' => $order->address->label,
-                'full_name' => $order->address->full_name,
-                'phone' => $order->address->phone,
-                'country_code' => $order->address->country_code,
-                'street_address' => $order->address->street_address,
-                'building_number' => $order->address->building_number,
-                'floor' => $order->address->floor,
-                'apartment' => $order->address->apartment,
-                'landmark' => $order->address->landmark,
-                'city' => $order->address->city,
-                'state' => $order->address->state,
-                'postal_code' => $order->address->postal_code,
-                'country' => $order->address->country,
-                'full_address' => $order->address->full_address,
-                'latitude' => $order->address->latitude,
-                'longitude' => $order->address->longitude,
-            ] : null,
-            'subtotal' => $order->subtotal,
-            'tax' => $order->tax,
-            'discount' => $order->discount,
-            'shipping_fee' => (float) ($order->shipping_fee ?? 0),
-            'total' => $order->total,
-            'notes' => $order->notes,
-            'created_at' => $order->created_at,
-            'updated_at' => $order->updated_at,
-            'placed_at' => $order->placed_at,
-            'processing_at' => $order->processing_at,
-            'shipping_at' => $order->shipping_at,
-            'out_for_delivery_at' => $order->out_for_delivery_at,
-            'delivered_at' => $order->delivered_at,
-            'estimated_delivery_time' => $order->estimated_delivery_time,
-            'special_note' => $order->special_note,
-            'schedule_delivery' => $order->schedule_delivery,
-            'delivery_speed' => $order->delivery_speed,
-        ];
     }
 }
