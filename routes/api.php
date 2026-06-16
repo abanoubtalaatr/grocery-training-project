@@ -217,8 +217,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Order routes
     Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->withoutMiddleware('auth:sanctum');
         Route::post('/', [OrderController::class, 'store']);
-        Route::get('/', [OrderController::class, 'index']);
         Route::get('/track', [OrderController::class, 'track']);
         Route::get('/{id}', [OrderController::class, 'show']);
     });

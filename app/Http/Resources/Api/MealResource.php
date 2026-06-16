@@ -21,6 +21,17 @@ class MealResource extends JsonResource
             'description' => $this->description,
             'image_url' => $this->image_url,
             'offer_title' => $this->offer_title,
+            'price' => (float) $this->price,
+            'discount_price' => $this->resolved_discount_price !== null ? (float) $this->resolved_discount_price : null,
+            'final_price' => (float) $this->final_price,
+            'category' => $this->whenLoaded('category', fn () => $this->category ? [
+                'id' => $this->category->id,
+                'name' => $this->category->name,
+            ] : null),
+            'subcategory' => $this->whenLoaded('subcategory', fn () => $this->subcategory ? [
+                'id' => $this->subcategory->id,
+                'name' => $this->subcategory->name,
+            ] : null),
         ];
     }
 }
