@@ -19,12 +19,6 @@ class AddressController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        if ($request->allFiles() !== []) {
-            return self::errorResponse('This endpoint does not accept file uploads.',
-                ['files' => ['Remove file attachments from the request.']], 422
-            );
-        }
-
         $user = $request->user();
 
         $addresses = $user->addresses()
@@ -35,14 +29,10 @@ class AddressController extends Controller
                 return $this->formatAddress($address);
             });
 
-        return self::successResponse(
-            'Addresses retrieved successfully',
-            [
-                'addresses' => $addresses,
-                'total_count' => $addresses->count(),
-            ],
-            200
-        );
+        return self::successResponse('Addresses retrieved successfully', [
+            'addresses' => $addresses,
+            'total_count' => $addresses->count(),
+        ], 200);
     }
 
     /**

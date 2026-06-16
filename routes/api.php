@@ -40,73 +40,11 @@ use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use Illuminate\Support\Facades\Route;
-use App\Traits\V1;
-
-use App\Jobs\SendInvoiceJob;
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-Route::get("/send-email", function (Request $request) {
-    $email = $request->query('email', 'omar-elsayed@example.com');
-
-    Bus::chain([
-        new SendEmailJob($email),
-        new CreateInvoiceJob($email),
-    ])->dispatch();
-
-    return response()->json([
-        "message" => "Email job dispatched successfully",
-        "email" => $email, 
-    ]);
-});
-
-Route::prefix("v1")->group(function(){
-   Route::get("/meals",[MealController::class,"index"]);
-});
-
-
-
-
-
-
-
-
-
-
-Route::get('/send-email', function () {
-    SendInvoiceEmailJob::dispatch();
-
-    return response()->json(['message' => 'Invoice email dispatched']);
-});
-
-    
-Route::get('/send-invoice', function () {
-
-sendInvoiceJob::dispatch(
-
-    'samiralsaied07@gmail.com',
-);
-
-    return response()->json([
-        'message' => 'Job queued successfully'
-    ]);
-});
 
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
          Route::get('/categories', [ApiCategoryController::class, 'index']);
     Route::get('/faqs', [ApiFaqController::class, 'index']);
-
-
-
-
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
