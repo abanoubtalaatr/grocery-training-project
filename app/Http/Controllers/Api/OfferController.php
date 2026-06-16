@@ -2,111 +2,59 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Offer;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\OfferResource;
+use App\Models\Offer;
+use App\Traits\ApiResponse;
+use Illuminate\Http\{JsonResponse, Request};
 
 class OfferController extends Controller
 {
+    use ApiResponse;
+
     // Get all active offers
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $query = Offer::active();
-        
-        // Filter by type if provided
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-        
-        // Filter by minimum purchase
-        if ($request->has('min_purchase')) {
-            $query->where('minimum_purchase', '<=', $request->min_purchase)
-                  ->orWhereNull('minimum_purchase');
-        }
-        
-        // Featured offers only
-        if ($request->boolean('featured')) {
-            $query->featured();
-        }
-        
-        // Search by title or code
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
-            });
-        }
-        
-        // Order by
-        $orderBy = $request->get('order_by', 'created_at');
-        $orderDirection = $request->get('order_direction', 'desc');
-        $query->orderBy($orderBy, $orderDirection);
-        
-        // Pagination
-        $perPage = $request->get('per_page', 15);
-        $offers = $query->paginate($perPage);
-        
-        return OfferResource::collection($offers);
+        $offers = Offer::active()
+            ->when($request->type, fn($q, $type) => $q->where('type', $type))
+            ->when($request->min_purchase, fn($q, $min) => $q->where(fn($sub) => $sub->where('minimum_purchase', '<=', $min)->orWhereNull('minimum_purchase')))
+            ->when($request->boolean('featured'), fn($q) => $q->featured())
+            ->when($request->search, fn($q, $s) => $q->where(fn($sub) => $sub->where('title', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%")))
+            ->orderBy($request->get('order_by', 'created_at'), $request->get('order_direction', 'desc'))
+            ->paginate($request->get('per_page', 15));
+
+        return $this->successResponse(OfferResource::collection($offers));
     }
 
     // Get featured offers
-    public function featured()
+    public function featured(): JsonResponse
     {
-        $offers = Offer::featured()
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-            
-        return OfferResource::collection($offers);
+        $offers = Offer::featured()->latest()->take(5)->get();
+        return $this->successResponse(OfferResource::collection($offers));
     }
 
     // Get offer by code
-    public function showByCode($code)
+    public function showByCode(string $code): JsonResponse
     {
         $offer = Offer::where('code', $code)->firstOrFail();
-        
-        return new OfferResource($offer);
+        return $this->successResponse(new OfferResource($offer));
     }
 
     // Validate offer code
-    public function validateOffer(Request $request)
+    public function validateOffer(Request $request): JsonResponse
     {
-        $request->validate([
-            'code' => 'required|string',
-            'amount' => 'nullable|numeric|min:0',
-        ]);
+        $request->validate(['code' => 'required|string', 'amount' => 'nullable|numeric|min:0']);
         
         $offer = Offer::where('code', $request->code)->first();
-        
-        if (!$offer) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Invalid offer code',
-            ], 404);
-        }
-        
+        if (!$offer) return $this->errorResponse('Invalid offer code', 404);
+
         $isValid = $offer->isValid();
-        $canApply = true;
-        $message = 'Offer is valid';
+        $canApply = !$request->has('amount') || $offer->canApplyToAmount($request->amount);
         
-        if ($isValid && $request->has('amount')) {
-            $canApply = $offer->canApplyToAmount($request->amount);
-            if (!$canApply) {
-                $message = 'Minimum purchase required: $' . $offer->minimum_purchase;
-            }
-        }
-        
-        $discount = $canApply && $isValid 
-            ? $offer->calculateDiscount($request->amount ?? 0)
-            : 0;
-        
-        return response()->json([
-            'valid' => $isValid && $canApply,
-            'offer' => new OfferResource($offer),
-            'discount_amount' => $discount,
-            'message' => $message,
-        ]);
+        return $this->successResponse([
+            'valid'           => $isValid && $canApply,
+            'offer'           => new OfferResource($offer),
+            'discount_amount' => ($isValid && $canApply) ? $offer->calculateDiscount($request->amount ?? 0) : 0,
+        ], ($isValid && $canApply) ? 'Offer is valid' : 'Minimum purchase required: $' . $offer->minimum_purchase);
     }
 }

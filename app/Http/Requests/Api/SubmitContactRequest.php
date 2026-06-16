@@ -1,0 +1,43 @@
+<?php
+
+
+namespace App\Http\Requests\Api;
+
+use App\Support\EmailValidation;
+use Illuminate\Foundation\Http\FormRequest;
+
+class SubmitContactRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'max:255', ...EmailValidation::formatRules()],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'min:10', 'max:250'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.not_regex' => EmailValidation::trailingHyphenDotBeforeAtMessage(),
+            'email.regex' => EmailValidation::domainStructureMessage(),
+            'email.max' => 'The email address may not exceed 255 characters.',
+        ];
+    }
+
+    public function Payload(): array
+    {
+        return array_merge($this->validated(), [
+            'ip_address' => $this->ip(),
+            'user_agent' => $this->userAgent(),
+        ]);
+    }
+}

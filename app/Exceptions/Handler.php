@@ -21,10 +21,20 @@ class Handler extends ExceptionHandler
     /**
      * Register the exception handling callbacks for the application.
      */
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            //
-        });
-    }
+   public function register(): void
+{
+    $this->renderable(function (\Throwable $e, $request) {
+        if ($request->is('api/*')) {
+            \Illuminate\Support\Facades\Log::error('API Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process request',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
+            ], 500);
+        }
+    });
+}
 }

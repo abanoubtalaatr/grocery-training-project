@@ -52,6 +52,7 @@ class ContactMessage extends Model
         $this->save();
     }
 
+
     public function markAsReplied()
     {
         $this->status = 'replied';
