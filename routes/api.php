@@ -105,7 +105,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::apiResource('addresses', AddressController::class);
-    Route::post('addresses/{address}/set-default', DefaultAddressController::class);
+    Route::post('addresses/{address}/set-default', DefaultAddressController::class)->name('addresses.set-default');
 
     // Smart List routes
     Route::prefix('smart-lists')->group(function () {

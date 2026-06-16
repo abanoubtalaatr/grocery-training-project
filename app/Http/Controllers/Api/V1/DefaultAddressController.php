@@ -11,21 +11,21 @@ use Illuminate\Http\Request;
 
 class DefaultAddressController extends Controller
 {
-    use ApiResponse;
+  use ApiResponse;
 
-    protected $addressService;
+  protected $addressService;
 
-    public function __construct(AddressService $addressService)
-    {
-        $this->addressService = $addressService;
-    }
+  public function __construct(AddressService $addressService)
+  {
+    $this->addressService = $addressService;
+  }
 
-    /**
-     * Set address as default.
-     */
-    public function store(Request $request, Address $address): JsonResponse
-    {
-        $this->addressService->setDefaultAddress($request->user(), $address);
-        return self::successResponse('Address set as default successfully');
-    }
+  /**
+   * Set address as default.
+   */
+  public function __invoke(Request $request, Address $address): JsonResponse
+  {
+    $this->addressService->setDefaultAddress($request->user(), $address);
+    return self::successResponse('Address set as default successfully');
+  }
 }
