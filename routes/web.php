@@ -34,3 +34,17 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+// Redirect default login to Filament's login page
+Route::redirect('/login', '/admin/login')->name('login');
+Route::redirect('/admin', '/admin-dashboard');
+
+// Custom Blade Admin Dashboard
+Route::middleware(['web', 'auth', \App\Http\Middleware\EnsureUserIsAdmin::class])
+    ->prefix('admin-dashboard')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/model/{model}', [\App\Http\Controllers\Admin\DashboardController::class, 'modelList'])->name('admin.model.list');
+        Route::get('/model/{model}/{id}', [\App\Http\Controllers\Admin\DashboardController::class, 'modelDetail'])->name('admin.model.detail');
+    });
+
