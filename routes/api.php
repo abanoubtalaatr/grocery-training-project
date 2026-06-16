@@ -3,6 +3,10 @@
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Auth\GoogleAuthController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Cart\AddCartItemController;
+use App\Http\Controllers\Api\Cart\ClearCartController;
+use App\Http\Controllers\Api\Cart\RemoveCartItemController;
+use App\Http\Controllers\Api\Cart\UpdateCartItemController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatbotController;
@@ -140,10 +144,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Cart routes
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index']);
-        Route::post('/items', [CartController::class, 'addItem']);
-        Route::put('/items/{itemId}', [CartController::class, 'updateItem']);
-        Route::delete('/items/{itemId}', [CartController::class, 'removeItem']);
-        Route::delete('/clear', [CartController::class, 'clear']);
+        Route::post('/items', AddCartItemController::class);
+        Route::put('/items/{itemId}', UpdateCartItemController::class);
+        Route::delete('/items/{itemId}', RemoveCartItemController::class);
+        Route::delete('/clear', ClearCartController::class);
     });
 
     // Favorites routes
