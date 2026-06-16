@@ -86,7 +86,7 @@ class AuthController extends Controller
         try {
             (new LogoutAction($this->authService))->handle($request->user());
 
-            return $this->successResponse('Logout successful');
+            return $this->successResponse('Logout successful',200);
         } catch (\Exception $e) {
             return $this->errorResponse('Logout failed', $e->getMessage(), 500);
         }
@@ -100,7 +100,7 @@ class AuthController extends Controller
         try {
             (new ForgotPasswordAction($this->authService))->handle($request->input('identifier'));
 
-            return $this->successResponse('OTP sent successfully. Please check your email or phone.');
+            return $this->successResponse('OTP sent successfully. Please check your email or phone.',200);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to send OTP', $e->getMessage(), 500);
         }
@@ -121,7 +121,7 @@ class AuthController extends Controller
                 return $this->errorResponse('Invalid or expired OTP', null, 400);
             }
 
-            return $this->successResponse('OTP verified successfully');
+            return $this->successResponse('OTP verified successfully',200);
         } catch (\Exception $e) {
             return $this->errorResponse('OTP verification failed', $e->getMessage(), 500);
         }
@@ -139,7 +139,7 @@ class AuthController extends Controller
                 $request->input('password')
             );
 
-            return $this->successResponse('Password reset successfully');
+            return $this->successResponse('Password reset successfully',200);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse('Password reset failed', $e->errors(), 400);
         } catch (\Exception $e) {
@@ -163,7 +163,7 @@ class AuthController extends Controller
         try {
             (new DeleteAccountAction($this->authService))->handle($request->user());
 
-            return $this->successResponse('Account deleted successfully');
+            return $this->successResponse('Account deleted successfully',200);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to delete account', $e->getMessage(), 500);
         }
@@ -180,7 +180,7 @@ class AuthController extends Controller
                 $request->input('password')
             );
 
-            return $this->successResponse('Password changed successfully');
+            return $this->successResponse('Password changed successfully',200);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to change password', $e->getMessage(), 500);
         }
