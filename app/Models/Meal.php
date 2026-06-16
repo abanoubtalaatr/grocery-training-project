@@ -131,19 +131,6 @@ class Meal extends Model
     }
 
     /**
-     * Scope a query to only include meals with active discounts (today's deals).
-     * Either has discount_price set or has offer_title (percentage discount can be calculated).
-     */
-    public function scopeWithActiveDiscount($query)
-    {
-        return $query->where(function ($q) {
-            $q->whereNotNull('discount_price')
-                ->orWhereNotNull('offer_title')
-                ->where('offer_title', '!=', '');
-        });
-    }
-
-    /**
      * Scope a query to only include available meals.
      */
     public function scopeAvailable($query)
@@ -309,4 +296,18 @@ class Meal extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    //scope filter 
+    public function scopeFilter(Builder $query, Request $request):Builder{
+        $static = self::resolveFilterClass();
+
+        return (new $static($request))->apply($query);
+    }
+
+    //base url to scope filter 
+    public static function resolveFilterClass():string{
+        return "App\\Filters\\".class_basename(Self::class)."Filter";
+    }
+
+    
 }
