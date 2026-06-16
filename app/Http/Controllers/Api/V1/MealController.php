@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\MealResource;
 use App\Models\Meal;
@@ -13,6 +14,6 @@ class MealController extends Controller
     {
         $meals = Meal::query()->filter($request->all())->get();
 
-        return MealResource::collection($meals);
+        return ApiResponse::success(MealResource::collection($meals));
     }
 }

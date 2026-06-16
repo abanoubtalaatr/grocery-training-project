@@ -2,15 +2,20 @@
 
 namespace App\Mail;
 
-use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PDFMail extends Mailable
+class PDFMail extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
+
+    public function __construct(
+        public string $pdfPath
+    ) {}
 
     public function envelope(): Envelope
     {
@@ -22,7 +27,16 @@ class PDFMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.pdf',
+            view: 'Emails.pdf',
         );
+    }
+
+    public function attachments(): array
+    {
+        return [
+            Attachment::fromPath($this->pdfPath)
+                ->as('invoice.pdf')
+                ->withMime('application/pdf'),
+        ];
     }
 }
