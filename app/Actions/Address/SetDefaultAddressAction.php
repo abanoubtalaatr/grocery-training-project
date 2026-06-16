@@ -2,24 +2,26 @@
 
 namespace App\Actions\Address;
 
-use App\Models\User;
 use App\Models\Address;
+use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class SetDefaultAddressAction
 {
-    public function execute(
+    public function __invoke(
         User $user,
-        string $id
+        Address $address
     ): Address {
-        return DB::transaction(function () use ($user, $id) {
+        if ((int) $address->user_id !== (int) $user->id) {
+            throw (new ModelNotFoundException())
+                ->setModel(Address::class, [$address->getKey()]);
+        }
 
-            $address = $user->addresses()->findOrFail($id);
-
+        return DB::transaction(function () use ($user, $address) {
             if (! $address->is_default) {
-
                 $user->addresses()
-                    ->where('id', '!=', $address->id)
+                    ->whereKeyNot($address->id)
                     ->update([
                         'is_default' => false,
                     ]);

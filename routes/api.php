@@ -93,12 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/sessions/{tokenId}', [ProfileController::class, 'destroySession']);
     });
 
-    // Address routes
-    Route::prefix('addresses')->group(function () {
-      Route::apiResource('addresses', AddressController::class);
-
-    Route::post(  'addresses/{address}/set-default',    [AddressController::class, 'setDefault']);
-    });
+    Route::apiResource('addresses', AddressController::class);
+    Route::post('addresses/{address}/set-default', [AddressController::class, 'setDefault']);
 
     Route::post('smart-lists/{id}/meals', [SmartListController::class, 'addMeal']);
     Route::delete('smart-lists/{id}/meals/{mealId}', [SmartListController::class, 'removeMeal']);
@@ -137,15 +133,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Cart routes
     Route::prefix('cart')->group(function () {
-     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
-        Route::delete('/cart/clear', [CartController::class, 'clear']);
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/items', [CartController::class, 'addItem']);
+        Route::put('/items/{itemId}', [CartController::class, 'updateItem']);
+        Route::delete('/items/{itemId}', [CartController::class, 'removeItem']);
+        Route::delete('/clear', [CartController::class, 'clear']);
     });
 
-    // Favorites routes
-    Route::prefix('favorites')->group(function () {
-     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
-        Route::delete('/{mealId}', [FavoriteController::class, 'remove']);
-    });
+    Route::get('favorites', [FavoriteController::class, 'index']);
+    Route::post('favorites/{meal}/toggle', [FavoriteController::class, 'toggle']);
+    Route::get('favorites/{meal}/check', [FavoriteController::class, 'check']);
+    Route::delete('favorites/{meal}', [FavoriteController::class, 'remove']);
 
     // Chatbot routes
     Route::prefix('chatbot')->group(function () {
@@ -159,13 +157,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/charge-card', [StripeController::class, 'chargeSavedCard']);
     Route::delete('/cards/{id}', [StripeController::class, 'deleteCard']);
 
-    // Order routes
-    Route::prefix('orders')->group(function () {
-       Route::apiResource('orders', OrderController::class)
-    ->only(['index', 'show', 'store']);
-
     Route::get('orders/track', [OrderController::class, 'track']);
-    });
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
 
     // Payment routes
     Route::prefix('payments')->group(function () {
@@ -229,15 +222,15 @@ Route::prefix('offers')->group(function () {
 });
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/{id}', [CategoryController::class, 'show']);
-    Route::get('/{id}/meals', [CategoryController::class, 'meals']);
+    Route::get('/{category}', [CategoryController::class, 'show']);
+    Route::get('/{category}/meals', [CategoryController::class, 'meals']);
 });
 
 // Subcategories routes
 Route::prefix('subcategories')->group(function () {
     Route::get('/', [SubcategoryController::class, 'index']);
-    Route::get('/{id}', [SubcategoryController::class, 'show']);
-    Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
+    Route::get('/{subcategory}', [SubcategoryController::class, 'show']);
+    Route::get('/{subcategory}/meals', [SubcategoryController::class, 'meals']);
 });
 Route::get('/faqs', [FaqController::class, 'index']);
 Route::get('/pages', [StaticPageController::class, 'index']);

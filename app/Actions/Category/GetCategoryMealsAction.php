@@ -3,14 +3,13 @@
 namespace App\Actions\Category;
 
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetCategoryMealsAction
 {
     public function execute(
         Category $category,
-        Request $request
+        array $filters = []
     ): LengthAwarePaginator {
 
         $query = $category->meals()
@@ -18,32 +17,32 @@ class GetCategoryMealsAction
             ->available();
 
         // Featured filter
-        if ($request->has('featured')) {
-            $request->boolean('featured')
+        if (array_key_exists('featured', $filters)) {
+            (bool) $filters['featured']
                 ? $query->featured()
                 : $query->where('is_featured', false);
         }
 
         // Subcategory filter
-        if ($request->filled('subcategory_id')) {
+        if (! empty($filters['subcategory_id'])) {
             $query->where(
                 'subcategory_id',
-                $request->input('subcategory_id')
+                $filters['subcategory_id']
             );
         }
 
         // Stock filter
-        if ($request->has('in_stock')) {
-            $request->boolean('in_stock')
+        if (array_key_exists('in_stock', $filters)) {
+            (bool) $filters['in_stock']
                 ? $query->inStock()
                 : $query->outOfStock();
         }
 
         // Sorting
-        $sortBy = $request->input('sort_by', 'created_at');
+        $sortBy = $filters['sort_by'] ?? 'created_at';
 
         $sortOrder = strtolower(
-            $request->input('sort_order', 'desc')
+            $filters['sort_order'] ?? 'desc'
         ) === 'asc'
             ? 'asc'
             : 'desc';
@@ -83,7 +82,7 @@ class GetCategoryMealsAction
         }
 
         $perPage = min(
-            max((int) $request->input('per_page', 15), 1),
+            max((int) ($filters['per_page'] ?? 15), 1),
             50
         );
 

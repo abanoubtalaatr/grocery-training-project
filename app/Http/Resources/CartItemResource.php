@@ -12,38 +12,7 @@ class CartItemResource extends JsonResource
         return [
             'id' => $this->id,
 
-            'meal' => [
-                'id' => $this->meal->id,
-                'title' => $this->meal->title,
-                'slug' => $this->meal->slug,
-                'image_url' => $this->meal->image_url,
-
-                ...$this->meal->getApiPriceAttributes(),
-
-                'rating' => (float) $this->meal->rating,
-                'size' => $this->meal->size,
-                'brand' => $this->meal->brand,
-
-                'stock_quantity' => $this->meal->stock_quantity,
-
-                'is_available' => $this->meal->is_available,
-
-                'in_stock' => $this->meal->isInStock(),
-
-                'category' => $this->meal->category
-                    ? [
-                        'id' => $this->meal->category->id,
-                        'name' => $this->meal->category->name,
-                    ]
-                    : null,
-
-                'subcategory' => $this->meal->subcategory
-                    ? [
-                        'id' => $this->meal->subcategory->id,
-                        'name' => $this->meal->subcategory->name,
-                    ]
-                    : null,
-            ],
+            'meal' => MealResource::make($this->meal),
 
             'quantity' => $this->quantity,
 

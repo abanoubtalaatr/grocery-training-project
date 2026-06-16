@@ -30,6 +30,16 @@ class CartResource extends JsonResource
 
             'total' => (float) $this->total,
 
+            'shipping_fee' => $this->when(
+                $this->getAttribute('shipping_fee') !== null,
+                fn () => (float) $this->getAttribute('shipping_fee')
+            ),
+
+            'total_with_shipping' => $this->when(
+                $this->getAttribute('total_with_shipping') !== null,
+                fn () => (float) $this->getAttribute('total_with_shipping')
+            ),
+
             'is_empty' => $this->isEmpty(),
 
             'created_at' => $this->created_at,

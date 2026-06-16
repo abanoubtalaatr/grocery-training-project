@@ -4,16 +4,16 @@ namespace App\Actions\Address;
 
 use App\Models\User;
 use App\Models\Address;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAddressAction
 {
-    public function execute(User $user, string $id, array $data): Address
+    public function execute(User $user, Address $address, array $data): Address
     {
-        return DB::transaction(function () use ($user, $id, $data) {
+        $this->ensureOwnedByUser($user, $address);
 
-            $address = $user->addresses()->findOrFail($id);
-
+        return DB::transaction(function () use ($address, $data) {
             if (
                 isset($data['phone'], $data['country_code']) &&
                 $data['country_code'] &&
@@ -29,5 +29,12 @@ class UpdateAddressAction
 
             return $address->fresh();
         });
+    }
+
+    private function ensureOwnedByUser(User $user, Address $address): void
+    {
+        if ((int) $address->user_id !== (int) $user->id) {
+            throw (new ModelNotFoundException())->setModel(Address::class, [$address->getKey()]);
+        }
     }
 }

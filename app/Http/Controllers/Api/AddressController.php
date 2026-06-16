@@ -2,111 +2,90 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Address\CreateAddressAction;
+use App\Actions\Address\GetAddressAction;
+use App\Actions\Address\GetAddressesAction;
+use App\Actions\Address\SetDefaultAddressAction;
+use App\Actions\Address\UpdateAddressAction;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
 use App\Http\Requests\StoreAddressRequest;
 use App\Http\Requests\UpdateAddressRequest;
-
-use App\Actions\Address\CreateAddressAction;
-use App\Actions\Address\UpdateAddressAction;
-use App\Actions\Address\DeleteAddressAction;
-use App\Actions\Address\SetDefaultAddressAction;
+use App\Http\Resources\AddressResource;
+use App\Models\Address;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AddressController extends Controller
 {
-    /**
-     * Get all user addresses
-     */
-   public function index(Request $request): JsonResponse
-{
-    $addresses = $request->user()
-        ->addresses()
-        ->latest()
-        ->orderByDesc('is_default')
-        ->get()
-        ->map(fn ($address) => $this->formatAddress($address));
+    public function index(Request $request, GetAddressesAction $action): JsonResponse
+    {
+        $addresses = $action->execute($request->user());
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Addresses retrieved successfully',
-        'data' => $addresses,
-        'total_count' => $addresses->count(),
-    ]);
-}
-    /**
-     * Get single address
-     */
-   public function show(
-    Request $request,
-    string $id,
-    GetAddressAction $action
-): JsonResponse
-{
-    $address = $action->execute(
-        $request->user(),
-        $id
-    );
+        return response()->json([
+            'success' => true,
+            'message' => 'Addresses retrieved successfully',
+            'data' => AddressResource::collection($addresses),
+            'total_count' => $addresses->count(),
+        ]);
+    }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Address retrieved successfully',
-        'data' => $this->formatAddress($address),
-    ]);
-}
+    public function show(Request $request, Address $address, GetAddressAction $action): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Address retrieved successfully',
+            'data' => AddressResource::make($action->execute($request->user(), $address)),
+        ]);
+    }
 
-    /**
-     * Create new address
-     */
-  public function store(
-    StoreAddressRequest $request,
-    CreateAddressAction $action
-): JsonResponse
-{
-    $address = $action->execute(
-        $request->user(),
-        $request->validated()
-    );
+    public function store(StoreAddressRequest $request, CreateAddressAction $action): JsonResponse
+    {
+        $address = $action->execute($request->user(), $request->validated());
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Address created successfully',
-        'data' => $this->formatAddress($address),
-    ], 201);
-}
-    /**
-     * Update address
-     */
+        return response()->json([
+            'success' => true,
+            'message' => 'Address created successfully',
+            'data' => AddressResource::make($address),
+        ], 201);
+    }
+
     public function update(
-    UpdateAddressRequest $request,
-    string $id,
-    UpdateAddressAction $action
-    ): JsonResponse
-        {
-      $address = $action->execute(
-        $request->user(),
-        $id,
-        $request->validated()
-    );
+        UpdateAddressRequest $request,
+        Address $address,
+        UpdateAddressAction $action
+    ): JsonResponse {
+        $address = $action->execute($request->user(), $address, $request->validated());
 
-    return response()->json(['success' => true,'message' => 'Address updated successfully','data' => $this->formatAddress($address),
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Address updated successfully',
+            'data' => AddressResource::make($address),
+        ]);
+    }
 
-    /**
-     * Delete address
-     */
-   public function destroy(
+  public function destroy(
     Request $request,
-    string $id,
-    DeleteAddressAction $action
-): JsonResponse
-{
-    $action->execute(
-        $request->user(),
-        $id
+    Address $address
+    ): JsonResponse {
+    abort_if(
+        $address->user_id !== $request->user()->id,
+        404
     );
+
+    DB::transaction(function () use ($request, $address) {
+        $wasDefault = $address->is_default;
+
+        $address->delete();
+
+        if ($wasDefault) {
+            $request->user()
+                ->addresses()
+                ->first()?->update([
+                    'is_default' => true,
+                ]);
+        }
+    });
 
     return response()->json([
         'success' => true,
@@ -114,18 +93,14 @@ class AddressController extends Controller
     ]);
 }
 
-    /**
-     * Set address as default
-     */
     public function setDefault(
     Request $request,
-    string $id,
+    Address $address,
     SetDefaultAddressAction $action
-): JsonResponse
-{
-    $address = $action->execute(
+): JsonResponse {
+    $address = $action(
         $request->user(),
-        $id
+        $address
     );
 
     return response()->json([
@@ -134,6 +109,4 @@ class AddressController extends Controller
         'data' => AddressResource::make($address),
     ]);
 }
-
-   
 }

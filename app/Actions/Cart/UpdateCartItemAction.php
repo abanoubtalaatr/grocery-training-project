@@ -5,6 +5,7 @@ namespace App\Actions\Cart;
 use App\Models\User;
 use App\Models\Cart;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class UpdateCartItemAction
 {
@@ -28,10 +29,9 @@ class UpdateCartItemAction
             $meal = $cartItem->meal;
 
             if ($meal->stock_quantity < $quantity) {
-                abort(
-                    400,
-                    "Only {$meal->stock_quantity} items available in stock"
-                );
+                throw ValidationException::withMessages([
+                    'quantity' => ["Only {$meal->stock_quantity} items available in stock."],
+                ]);
             }
 
             $cartItem->update([

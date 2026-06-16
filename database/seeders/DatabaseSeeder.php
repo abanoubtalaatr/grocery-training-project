@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CategorySeeder::class,
+            AdminUserSeeder::class,
             SubcategorySeeder::class,
             MealSeeder::class,
             LargeMealSeeder::class,

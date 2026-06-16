@@ -3,6 +3,13 @@
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\MealController;
+use App\Http\Controllers\Admin\SubcategoryController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\LanguageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +21,52 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get(
+    '/language/{locale}',
+    [LanguageController::class, 'switch']
+)->name('language.switch');
+
+Route::prefix('admin')
+    ->middleware('locale')
+    ->name('admin.')
+    ->group(function () {
+
+    Route::get(
+    '/orders',
+    [OrderController::class, 'index']
+)->name('orders.index');
+
+    Route::get(
+    '/meals',
+    [MealController::class, 'index']
+)->name('meals.index');
+
+
+
+        Route::get(
+    '/subcategories',
+    [SubcategoryController::class, 'index']
+)->name('subcategories.index');
+
+        Route::get(
+    '/categories',
+    [CategoryController::class, 'index']
+        )->name('categories.index');
+
+        Route::get(
+            '/',
+            [DashboardController::class, 'index']
+        )->name('dashboard');
+
+        Route::get(
+            '/users',
+            [UserController::class, 'index']
+        )->name('users.index');
+    });
+
+
+
 
 Route::get('/', function () {
     return response()->json([

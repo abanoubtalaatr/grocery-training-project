@@ -6,6 +6,7 @@ use App\Models\Meal;
 use App\Models\User;
 use App\Models\Cart;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AddCartItemAction
 {
@@ -20,18 +21,21 @@ class AddCartItemAction
             $meal = Meal::findOrFail($data['meal_id']);
 
             if (! $meal->is_available) {
-                abort(400, 'This meal is currently unavailable');
+                throw ValidationException::withMessages([
+                    'meal_id' => ['This meal is currently unavailable.'],
+                ]);
             }
 
             if (! $meal->isInStock()) {
-                abort(400, 'This meal is out of stock');
+                throw ValidationException::withMessages([
+                    'meal_id' => ['This meal is out of stock.'],
+                ]);
             }
 
             if ($meal->stock_quantity < $data['quantity']) {
-                abort(
-                    400,
-                    "Only {$meal->stock_quantity} items available in stock"
-                );
+                throw ValidationException::withMessages([
+                    'quantity' => ["Only {$meal->stock_quantity} items available in stock."],
+                ]);
             }
 
             $cartItem = $cart->items()
@@ -49,10 +53,9 @@ class AddCartItemAction
                 );
 
                 if ($newQuantity > $effectiveMax) {
-                    abort(
-                        400,
-                        "Maximum {$maxPerProduct} units per product."
-                    );
+                    throw ValidationException::withMessages([
+                        'quantity' => ["Maximum {$maxPerProduct} units per product."],
+                    ]);
                 }
 
                 $cartItem->update([

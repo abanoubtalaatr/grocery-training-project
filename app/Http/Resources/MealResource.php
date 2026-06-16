@@ -22,6 +22,11 @@ class MealResource extends JsonResource
             'rating' => (float) $this->rating,
             'rating_count' => (int) $this->rating_count,
             'has_offer' => $this->hasOffer(),
+            'size' => $this->size,
+            'brand' => $this->brand,
+            'stock_quantity' => $this->stock_quantity,
+            'in_stock' => $this->isInStock(),
+            'is_available' => $this->is_available,
             'is_featured' => $this->is_featured,
             'features' => $this->features,
         ];

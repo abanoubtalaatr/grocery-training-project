@@ -3,14 +3,20 @@
 namespace App\Actions\Cart;
 
 use App\Models\User;
+use App\Models\Cart;
 use App\Services\ShippingService;
 
 class GetCartAction
 {
+    public function __construct(
+        private readonly ShippingService $shippingService
+    ) {
+    }
+
     public function execute(
         User $user,
         ?string $deliveryType = null
-    ): array {
+    ): Cart {
 
         $cart = $user->getOrCreateCart();
 
@@ -26,9 +32,7 @@ class GetCartAction
             $deliveryType &&
             in_array($deliveryType, ['delivery', 'pickup'], true)
         ) {
-            $shippingService = app(ShippingService::class);
-
-            $shippingFee = $shippingService
+            $shippingFee = $this->shippingService
                 ->calculateShippingFee(
                     (float) $cart->subtotal,
                     $deliveryType
@@ -39,10 +43,9 @@ class GetCartAction
                 $shippingFee;
         }
 
-        return [
-            'cart' => $cart,
-            'shipping_fee' => $shippingFee,
-            'total_with_shipping' => $totalWithShipping,
-        ];
+        $cart->setAttribute('shipping_fee', $shippingFee);
+        $cart->setAttribute('total_with_shipping', $totalWithShipping);
+
+        return $cart;
     }
 }
