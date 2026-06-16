@@ -34,6 +34,7 @@ use App\Jobs\SendEmailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Route;
+use App\Traits\V1;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,7 +56,7 @@ Route::get("/send-email", function (Request $request) {
 
     return response()->json([
         "message" => "Email job dispatched successfully",
-        "email" => $email,
+        "email" => $email, 
     ]);
 });
 
