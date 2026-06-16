@@ -10,9 +10,10 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 
+use App\Models\Concerns\Filterable;
 class Meal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Filterable;
 
     /**
      * The attributes that are mass assignable.
