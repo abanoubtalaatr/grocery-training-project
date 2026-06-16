@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Address\StoreAddressAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\AddressRequest;
 use App\Models\Address;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,20 +14,13 @@ use Illuminate\Support\Facades\Validator;
 
 class AddressController extends Controller
 {
+    use ResponseApi;
     /**
      * Get all user addresses
      */
     public function index(Request $request): JsonResponse
     {
-        if ($request->allFiles() !== []) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This endpoint does not accept file uploads.',
-                'errors' => ['files' => ['Remove file attachments from the request.']],
-            ], 422);
-        }
-
-        try {
+      
             $user = $request->user();
 
             $addresses = $user->addresses()
@@ -35,123 +31,31 @@ class AddressController extends Controller
                     return $this->formatAddress($address);
                 });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Addresses retrieved successfully',
-                'data' => $addresses,
-                'total_count' => $addresses->count(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve addresses',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return $this->success('Addresses retrieved successfully',$addresses,200,'total_count'=> $addresses->count());
+               
+       
     }
 
     /**
      * Get single address
      */
-    public function show(Request $request, string $id): JsonResponse
+    public function show(Request $request, Address $address): JsonResponse
     {
-        try {
-            $user = $request->user();
-            $address = $user->addresses()->findOrFail($id);
+       
+            $address = $request->user->addresses()->findOrFail($address->id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Address retrieved successfully',
-                'data' => $this->formatAddress($address),
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve address',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
+            return $this->success(true,'Address retrieved successfully',$this->formatAddress($address));
+                
+        } 
     /**
      * Create new address
      */
-    public function store(Request $request): JsonResponse
+    public function store(AddressRequest $request, StoreAddressAction $storeAddressAction): JsonResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'label' => ['nullable', 'string', 'max:255'],
-                'full_name' => ['required', 'string', 'min:2', 'max:255'],
-                'phone' => ['required', 'string', 'min:10', 'max:20', 'regex:/^\+?[1-9]\d{9,14}$/'],
-                'country_code' => ['nullable', 'string', 'max:5', 'regex:/^\+\d{1,4}$/'],
-                'street_address' => ['required', 'string', 'min:5', 'max:500'],
-                'building_number' => ['nullable', 'string', 'max:50'],
-                'floor' => ['nullable', 'string', 'max:50'],
-                'apartment' => ['nullable', 'string', 'max:50'],
-                'landmark' => ['nullable', 'string', 'max:255'],
-                'city' => ['required', 'string', 'min:2', 'max:100'],
-                'state' => ['nullable', 'string', 'max:100'],
-                'postal_code' => ['nullable', 'string', 'max:20'],
-                'country' => ['nullable', 'string', 'max:100'],
-                'notes' => ['nullable', 'string', 'max:1000'],
-                'is_default' => ['nullable', 'boolean'],
-                'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-                'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            ], [
-                'full_name.min' => 'Full name must be at least 2 characters.',
-                'phone.min' => 'Phone number must be at least 10 digits.',
-                'phone.regex' => 'Please enter a valid phone number (with country code if needed).',
-                'street_address.min' => 'Street address must be at least 5 characters.',
-                'city.min' => 'City must be at least 2 characters.',
-            ]);
+              $user=$request->user();
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            $user = $request->user();
-
-            DB::beginTransaction();
-
-            // If this is the first address, make it default
-            $isFirstAddress = $user->addresses()->count() === 0;
-            $data = array_merge(
-                $validator->validated(),
-                ['is_default' => $request->boolean('is_default') || $isFirstAddress]
-            );
-            // Normalize phone: if phone already starts with country code, store only the national part
-            $phone = trim($data['phone'] ?? '');
-            $code = trim($data['country_code'] ?? '');
-            if ($code !== '' && str_starts_with($phone, $code)) {
-                $data['phone'] = substr($phone, strlen($code));
-            }
-            $address = $user->addresses()->create($data);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Address created successfully',
-                'data' => $this->formatAddress($address),
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create address',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return $this->success('Address created successfully', $this->formatAddress($storeAddressAction->excute($user,$request)),201);
+         
     }
 
     /**
@@ -226,13 +130,13 @@ class AddressController extends Controller
     /**
      * Delete address
      */
-    public function destroy(Request $request, string $id): JsonResponse
+    public function destroy(Request $request, Address $address): JsonResponse
     {
-        try {
+      
             $user = $request->user();
-            $address = $user->addresses()->findOrFail($id);
+            $address = $user->addresses()->findOrFail($address->id);
 
-            DB::beginTransaction();
+           
 
             $wasDefault = $address->is_default;
             $address->delete();
@@ -247,24 +151,8 @@ class AddressController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Address deleted successfully',
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found',
-            ], 404);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete address',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return $this->success('Address deleted successfully');
+       
     }
 
     /**

@@ -31,6 +31,11 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
+use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
+use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
+use App\Jobs\SendToInventoryJob;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,8 +47,17 @@ use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 |
 */
 
+Route::get('email-send',function(){
+  SendToInventoryJob::dispatch()->delay(now()->addSeconds(10));
+  return response()->json(['message'=>"Email send"]);
+});
+
+Route::get('send-invoice',[InvoiceController::class, 'send1']);
+
 Route::prefix('v1')->group(function () {
     Route::get('/meals', [ApiMealController::class, 'index']);
+     Route::get('/categories', [ApiCategoryController::class, 'index']);
+      Route::get('/reviews', [ApiReviewController::class, 'index']);
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
@@ -80,11 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::prefix('addresses')->group(function () {
-        Route::get('/', [AddressController::class, 'index']);
-        Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
+        Route::apiResource('/address',AddressController::class);
         Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
     });
 

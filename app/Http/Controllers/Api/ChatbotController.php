@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ChatbotMessage;
 use App\Services\ChatbotService;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,7 @@ use Throwable;
 
 class ChatbotController extends Controller
 {
+    use ResponseApi;
     public function __construct(private readonly ChatbotService $chatbotService) {}
 
     /**
@@ -186,10 +188,6 @@ class ChatbotController extends Controller
                 ['id' => 'offers',   'label' => 'Coupons & offers',   'question' => 'What promo codes or offers are available?'],
             ];
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Suggestions retrieved successfully',
-            'data' => ['suggestions' => $suggestions],
-        ]);
+        return $this->success('Suggestions retrieved successfully', $suggestions);
     }
 }

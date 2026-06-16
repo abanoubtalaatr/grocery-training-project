@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ContactRequest;
 use App\Http\Resources\ContactMessageCollection;
 use App\Http\Resources\ContactMessageResource;
 use App\Mail\ContactMessageReceived;
@@ -18,28 +19,11 @@ class ContactController extends Controller
     /**
      * Submit a contact message.
      */
-    public function submit(Request $request)
+    public function submit(ContactRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => ['required', ...EmailValidation::formatRules(), 'max:255'],
-            'phone' => 'nullable|string|max:20',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|min:10|max:250',
-            // 'g-recaptcha-response' => 'required|recaptcha' // If using reCAPTCHA
-        ], [
-            'email.not_regex' => EmailValidation::trailingHyphenDotBeforeAtMessage(),
-            'email.regex' => EmailValidation::domainStructureMessage(),
-            'email.max' => 'The email address may not exceed 255 characters.',
-        ]);
+      
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
+      
         // Check for spam (simple check for demo)
         if ($this->isSpam($request->message, $request->email)) {
             return response()->json([

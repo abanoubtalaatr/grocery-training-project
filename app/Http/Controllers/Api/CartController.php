@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Meal;
 use App\Services\ShippingService;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class CartController extends Controller
 {
+    use ResponseApi;
     /**
      * Get user's cart
      */
@@ -33,17 +35,11 @@ class CartController extends Controller
                 $totalWithShipping = null;
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Cart retrieved successfully',
-                'data' => $this->formatCart($cart, $shippingFee, $totalWithShipping),
+            return $this->success(['Cart retrieved successfully',$this->formatCart($cart, $shippingFee, $totalWithShipping),
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve cart',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed('Failed to retrieve cart', $e->getMessage(),500);
+           
         }
     }
 
@@ -232,13 +228,13 @@ class CartController extends Controller
     /**
      * Remove item from cart
      */
-    public function removeItem(Request $request, string $itemId): JsonResponse
+    public function removeItem(Request $request, CartItem $cartItem): JsonResponse
     {
         try {
             $user = $request->user();
             $cart = $user->getOrCreateCart();
             
-            $cartItem = $cart->items()->findOrFail($itemId);
+            $cartItem = $cart->items()->findOrFail($cartItem->id);
 
             DB::beginTransaction();
 
@@ -249,23 +245,12 @@ class CartController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Item removed from cart successfully',
-                'data' => $this->formatCart($cart),
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cart item not found',
-            ], 404);
-        } catch (\Exception $e) {
+            return $this->success('Item removed from cart successfully',$this->formatCart($cart));
+        } 
+       
+         catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to remove item from cart',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed( 'Failed to remove item from cart', $e->getMessage(), 500);
         }
     }
 

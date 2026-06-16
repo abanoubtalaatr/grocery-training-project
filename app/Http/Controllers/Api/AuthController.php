@@ -11,11 +11,13 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Services\AuthService;
+use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    use ResponseApi;
     public function __construct(
         protected AuthService $authService
     ) {}
@@ -28,26 +30,19 @@ class AuthController extends Controller
         try {
             $result = $this->authService->register($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful',
-                'data' => [
+            return $this->success('Registration successful',
+                     [
                     'user' => [
                         'id' => $result['user']->id,
                         'username' => $result['user']->username,
                         'email' => $result['user']->email,
                         'phone' => $result['user']->phone,
                         'created_at' => $result['user']->created_at,
-                    ],
-                    'token' => $result['token'],
-                ],
-            ], 201);
+                        'token' => $result['token'],
+                    ]], 201);
+
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration failed',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed( 'Registration failed', $e->getMessage(),500);
         }
     }
 
@@ -62,10 +57,10 @@ class AuthController extends Controller
                 $request->input('password')
             );
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
+            return $this->success(
+               
+                'Login successful',
+                [
                     'user' => [
                         'id' => $result['user']->id,
                         'username' => $result['user']->username,
@@ -74,19 +69,11 @@ class AuthController extends Controller
                     ],
                     'token' => $result['token'],
                 ],
-            ]);
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed',
-                'errors' => $e->errors(),
-            ], 401);
+            return $this->failed( 'Login failed', $e->errors(), 401);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->failed([ 'Login failed', $e->getMessage(), 500);
         }
     }
 

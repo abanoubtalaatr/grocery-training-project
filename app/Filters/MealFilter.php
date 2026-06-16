@@ -15,4 +15,26 @@ class MealFilter extends QueryFilter
     {
         $this->builder->where('is_available', $value);
     }
+
+     public function meal_id($value)
+     {
+        $this->builder->where('meal_id',$value);
+     }
+
+      public function rating($value)
+     {
+        $this->builder->where('rating',$value);
+     }
+
+      public function comment($value)
+     {
+        $this->builder->where('comment',$value);
+     }
+
+      public function is_approved($value)
+     {
+        $this->builder->where('is_approved',$value);
+     }
+   
+        
 }
