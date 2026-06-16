@@ -5,37 +5,71 @@
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/mixins";
 
-// 2. FilamentPHP-inspired Basic Colors & Overrides
-$filament-primary: #fbbf24; // Amber 400
-$filament-primary-dark: #f59e0b; // Amber 500
-$filament-success: #22c55e; // Green 500
-$filament-danger: #ef4444; // Red 500
-$filament-warning: #f59e0b; // Amber 500
-$filament-info: #3b82f6; // Blue 500
-$filament-gray: #64748b; // Slate 500
-$filament-dark: #111827; // Gray 900
+// ============================================================================
+// 2. Grocery App — Elegant Green Palette
+// ----------------------------------------------------------------------------
+// Inspired by fresh produce + premium grocery branding (Whole Foods / Trader
+// Joe's vibe): deep emerald structure + leaf-green actions + soft gold accent.
+// ============================================================================
 
-// Map these to legacy variables used in the project or update them
-$orange: $filament-primary;
-$orange-light: rgba($filament-primary, 0.4);
-$blue: $filament-dark;
-$blue-dark: darken($filament-dark, 5%);
-$blue-light: $filament-info;
+// --- Primary brand greens (leaf / fresh) ---
+$grocery-primary: #15803d; // Green 700  — refined, slightly deep leaf
+$grocery-primary-dark: #166534; // Green 800  — hover / pressed
+$grocery-primary-light: #22c55e; // Green 500  — highlights, badges
+
+// --- Structural greens (deep emerald, used in sidebar / header) ---
+$grocery-emerald: #047857; // Emerald 700
+$grocery-emerald-deep: #064e3b; // Emerald 900
+$grocery-emerald-night: #022c22; // Emerald 950 — sidebar background
+
+// --- Accent (warm gold — premium grocery feel) ---
+$grocery-accent: #d4a017; // muted gold, more elegant than amber
+$grocery-accent-soft: #e6b54a;
+
+// --- Status colors (kept tasteful) ---
+$grocery-success: #16a34a; // Green 600
+$grocery-danger: #dc2626; // Red 600  — slightly deeper than #ef4444
+$grocery-warning: #ca8a04; // Yellow 700 — more elegant than amber
+$grocery-info: #0ea5e9; // Sky 500
+$grocery-gray: #64748b; // Slate 500
+$grocery-dark: #0f1a14; // very deep green-tinted charcoal
+
+// --- Legacy aliases (kept so existing .btn-orange / .btn-blue templates
+//     keep working — values are now green-based) ---
+$filament-primary: $grocery-primary;
+$filament-primary-dark: $grocery-primary-dark;
+$filament-success: $grocery-success;
+$filament-danger: $grocery-danger;
+$filament-warning: $grocery-warning;
+$filament-info: $grocery-info;
+$filament-gray: $grocery-gray;
+$filament-dark: $grocery-dark;
+
+$orange: $grocery-primary;
+$orange-light: rgba($grocery-primary, 0.4);
+$blue: $grocery-emerald-deep;
+$blue-dark: darken($grocery-emerald-deep, 3%);
+$blue-light: $grocery-info;
 
 // ============================================================================
 // Add your colors to Bootstrap's theme map
 $theme-colors: map-merge(
   $theme-colors,
   (
-    "primary": $filament-primary,
-    "success": $filament-success,
-    "danger": $filament-danger,
-    "warning": $filament-warning,
-    "info": $filament-info,
-    "secondary": $filament-gray,
-    "dark": $filament-dark,
-    "orange": $orange,
-    "blue-custom": $blue,
+    "primary": $grocery-primary,
+    "success": $grocery-success,
+    "danger": $grocery-danger,
+    "warning": $grocery-warning,
+    "info": $grocery-info,
+    "secondary": $grocery-gray,
+    "dark": $grocery-dark,
+    "orange": $grocery-primary,
+    // legacy alias → green
+    "blue-custom": $grocery-emerald-deep,
+    // legacy alias → emerald
+    "emerald": $grocery-emerald,
+    "leaf": $grocery-primary-light,
+    "accent": $grocery-accent,
   )
 );
 
@@ -45,17 +79,21 @@ $border-radius-sm: 0.375rem;
 $border-radius-lg: 0.75rem;
 $border-radius-xl: 1rem;
 
-// Override focus color
-$input-focus-border-color: $filament-primary;
-$input-focus-box-shadow: 0 0 0 0.15rem rgba($filament-primary, 0.25);
+// Override focus color — green focus ring
+$input-focus-border-color: $grocery-primary;
+$input-focus-box-shadow: 0 0 0 0.15rem rgba($grocery-primary, 0.22);
 
-$nav-link-color: $filament-primary-dark;
-$nav-link-hover-color: darken($filament-primary, 15%);
+$nav-link-color: $grocery-primary-dark;
+$nav-link-hover-color: darken($grocery-primary, 8%);
 
-// For the shadows (Filament style: neutral and subtle)
-$box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+// Shadows (neutral and subtle)
+$box-shadow:
+  0 1px 3px 0 rgba(0, 0, 0, 0.1),
+  0 1px 2px -1px rgba(0, 0, 0, 0.1);
 $box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$box-shadow-lg:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -4px rgba(0, 0, 0, 0.1);
 $box-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 
 // 3. Import the rest of Bootstrap
@@ -63,52 +101,71 @@ $box-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 
 // 4. Your custom components (AFTER Bootstrap)
 .btn-orange {
-  @include button-variant($orange, $orange);
+  @include button-variant($grocery-primary, darken($grocery-primary, 4%));
 }
 
 .btn-outline-orange {
-  @include button-outline-variant($orange);
+  @include button-outline-variant($grocery-primary);
 }
 
 .btn-blue {
-  @include button-variant($blue, $blue);
+  @include button-variant(
+    $grocery-emerald-deep,
+    darken($grocery-emerald-deep, 4%)
+  );
 }
 
 .btn-outline-blue {
-  @include button-outline-variant($blue);
+  @include button-outline-variant($grocery-emerald-deep);
+}
+
+// New semantic green buttons
+.btn-leaf {
+  @include button-variant(
+    $grocery-primary-light,
+    darken($grocery-primary-light, 4%)
+  );
+}
+.btn-emerald {
+  @include button-variant($grocery-emerald, darken($grocery-emerald, 4%));
+}
+.btn-accent {
+  @include button-variant($grocery-accent, darken($grocery-accent, 4%));
 }
 
 // ============================================================================
 // ADMIN LAYOUT WRAPPER
 // ============================================================================
-// CSS custom properties for theming
 :root {
-  --page-bg:       #0f172a;
-  --page-text:     #e2e8f0;
-  --sidebar-bg:    #111827;
-  --content-bg:    #0f172a;
+  --page-bg: #0a1410; // very deep green-tinted charcoal (dark mode)
+  --page-text: #e2e8f0;
+  --sidebar-bg: #022c22; // emerald-950
+  --content-bg: #0a1410;
 }
 
 [data-theme="light"] {
-  --page-bg:       #f1f5f9;
-  --page-text:     #1e293b;
-  --sidebar-bg:    #ffffff;
-  --content-bg:    #f1f5f9;
+  --page-bg: #f0fdf4; // green-50 — subtle fresh tint
+  --page-text: #1e293b;
+  --sidebar-bg: #ffffff;
+  --content-bg: #f0fdf4;
 }
 
 body {
   background-color: var(--page-bg);
   color: var(--page-text);
   margin: 0;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
-// Prevent scroll when mobile sidebar is open
-body.sidebar-body-lock { overflow: hidden; }
+body.sidebar-body-lock {
+  overflow: hidden;
+}
 
 .mobile-topbar {
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-  border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+  background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.18);
   min-height: 52px;
 }
 
@@ -123,7 +180,10 @@ body.sidebar-body-lock { overflow: hidden; }
   padding: 1.75rem;
   background-color: var(--content-bg);
   color: var(--page-text);
-  transition: margin-left 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+  transition:
+    margin-left 0.25s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
   overflow-x: hidden;
 }
 
@@ -132,13 +192,13 @@ body.sidebar-body-lock { overflow: hidden; }
 // ============================================================================
 $sidebar-width: 260px;
 $sidebar-collapsed-width: 68px;
-$sidebar-bg: #111827;
-$sidebar-border: rgba(255, 255, 255, 0.06);
-$sidebar-item-active-bg: rgba(251, 191, 36, 0.12);
-$sidebar-item-active-color: #fbbf24;
-$sidebar-item-hover-bg: rgba(255, 255, 255, 0.06);
-$sidebar-item-color: #94a3b8;
-$sidebar-item-hover-color: #e2e8f0;
+$sidebar-bg: #022c22; // emerald-950
+$sidebar-border: rgba(52, 211, 153, 0.08); // subtle emerald edge
+$sidebar-item-active-bg: rgba(52, 211, 153, 0.12); // emerald-400 @ 12%
+$sidebar-item-active-color: #34d399; // emerald-400
+$sidebar-item-hover-bg: rgba(255, 255, 255, 0.05);
+$sidebar-item-color: #94a3b8; // slate-400
+$sidebar-item-hover-color: #ecfdf5; // green-50
 $sidebar-group-label-color: #475569;
 $sidebar-transition: 0.25s ease;
 
@@ -167,8 +227,12 @@ $sidebar-transition: 0.25s ease;
   align-items: center;
   gap: 0.75rem;
   padding: 1.1rem 1rem;
-  background: linear-gradient(160deg, #312e81 0%, #1e1b4b 100%);
-  border-bottom: 1px solid rgba(167, 139, 250, 0.15);
+  background: linear-gradient(
+    160deg,
+    #064e3b 0%,
+    #022c22 100%
+  ); // emerald gradient
+  border-bottom: 1px solid rgba(52, 211, 153, 0.15);
   flex-shrink: 0;
   overflow: hidden;
   white-space: nowrap;
@@ -181,21 +245,27 @@ $sidebar-transition: 0.25s ease;
     width: 36px;
     height: 36px;
     min-width: 36px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    background: linear-gradient(
+      135deg,
+      #34d399,
+      #10b981
+    ); // emerald-400 → emerald-500
     border-radius: 10px;
-    color: #1e1b4b;
+    color: #022c22;
     font-size: 0.9rem;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
   }
 
   .sidebar-brand-name {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #f1f5f9;
+    color: #ecfdf5; // green-50
     letter-spacing: 0.01em;
     transition: opacity $sidebar-transition;
 
-    span { color: #fbbf24; }
+    span {
+      color: #34d399;
+    } // emerald accent
   }
 }
 
@@ -208,12 +278,16 @@ $sidebar-transition: 0.25s ease;
   overflow-x: hidden;
   padding: 0.75rem 0.5rem;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: rgba(52, 211, 153, 0.15) transparent;
 
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(52, 211, 153, 0.15);
     border-radius: 4px;
   }
 }
@@ -234,7 +308,9 @@ $sidebar-transition: 0.25s ease;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
-    transition: background $sidebar-transition, color $sidebar-transition;
+    transition:
+      background $sidebar-transition,
+      color $sidebar-transition;
 
     .sidebar-item-icon {
       width: 18px;
@@ -256,7 +332,9 @@ $sidebar-transition: 0.25s ease;
       background: $sidebar-item-active-bg;
       color: $sidebar-item-active-color;
 
-      .sidebar-item-icon { color: $sidebar-item-active-color; }
+      .sidebar-item-icon {
+        color: $sidebar-item-active-color;
+      }
     }
   }
 }
@@ -285,9 +363,13 @@ $sidebar-transition: 0.25s ease;
   user-select: none;
   transition: color $sidebar-transition;
 
-  &:hover { color: #94a3b8; }
+  &:hover {
+    color: #6ee7b7;
+  } // emerald-300
 
-  .group-label-text { transition: opacity $sidebar-transition; }
+  .group-label-text {
+    transition: opacity $sidebar-transition;
+  }
 
   .nav-chevron {
     transition: transform $sidebar-transition;
@@ -296,7 +378,9 @@ $sidebar-transition: 0.25s ease;
     flex-shrink: 0;
   }
 
-  &.collapsed .nav-chevron { transform: rotate(-90deg); }
+  &.collapsed .nav-chevron {
+    transform: rotate(-90deg);
+  }
 }
 
 .nav-group-items {
@@ -327,13 +411,13 @@ $sidebar-transition: 0.25s ease;
       height: 32px;
       min-width: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      background: linear-gradient(135deg, #34d399, #10b981); // emerald avatar
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
       font-weight: 700;
-      color: #1e1b4b;
+      color: #022c22;
     }
 
     .sidebar-user-info {
@@ -343,7 +427,7 @@ $sidebar-transition: 0.25s ease;
       .sidebar-user-name {
         font-size: 0.8rem;
         font-weight: 600;
-        color: #e2e8f0;
+        color: #ecfdf5; // green-50
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -351,14 +435,14 @@ $sidebar-transition: 0.25s ease;
 
       .sidebar-user-role {
         font-size: 0.7rem;
-        color: #64748b;
+        color: #6ee7b7; // emerald-300
       }
     }
   }
 
   .sidebar-collapse-btn {
     background: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.12);
     color: #64748b;
     border-radius: 7px;
     width: 28px;
@@ -368,12 +452,15 @@ $sidebar-transition: 0.25s ease;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background $sidebar-transition, color $sidebar-transition, transform $sidebar-transition;
+    transition:
+      background $sidebar-transition,
+      color $sidebar-transition,
+      transform $sidebar-transition;
     font-size: 0.75rem;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #e2e8f0;
+      background: rgba(52, 211, 153, 0.08);
+      color: #ecfdf5;
     }
   }
 }
@@ -400,7 +487,9 @@ $sidebar-transition: 0.25s ease;
     padding: 0.45rem;
   }
 
-  .nav-group-items { padding-left: 0; }
+  .nav-group-items {
+    padding-left: 0;
+  }
 
   .sidebar-item a {
     justify-content: center;
@@ -413,7 +502,9 @@ $sidebar-transition: 0.25s ease;
     padding: 0.85rem 0.5rem;
   }
 
-  .sidebar-collapse-btn { transform: rotate(180deg); }
+  .sidebar-collapse-btn {
+    transform: rotate(180deg);
+  }
 }
 
 // ============================================================================
@@ -423,16 +514,16 @@ $sidebar-transition: 0.25s ease;
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(2, 44, 34, 0.55); // green-tinted overlay
   backdrop-filter: blur(2px);
   z-index: 1040;
   opacity: 0;
-  pointer-events: none;        // ← never block clicks when hidden
+  pointer-events: none;
   transition: opacity 0.25s ease;
 
   &.active {
     opacity: 1;
-    pointer-events: auto;      // ← only intercept clicks when visible
+    pointer-events: auto;
   }
 }
 
@@ -456,9 +547,13 @@ $sidebar-transition: 0.25s ease;
     transform: translateX(0);
   }
 
-  .sidebar-overlay { display: block; }
+  .sidebar-overlay {
+    display: block;
+  }
 
-  .admin-wrapper { display: block; }
+  .admin-wrapper {
+    display: block;
+  }
 
   .admin-content {
     margin-left: 0 !important;
@@ -472,35 +567,62 @@ $sidebar-transition: 0.25s ease;
 [data-theme="light"] {
   .admin-sidebar {
     background: #ffffff;
-    border-right-color: #e2e8f0;
+    border-right-color: #d1fae5; // green-100
   }
 
   .sidebar-header {
-    background: linear-gradient(160deg, #4338ca 0%, #312e81 100%);
+    background: linear-gradient(
+      160deg,
+      #047857 0%,
+      #064e3b 100%
+    ); // emerald gradient
   }
 
   .sidebar-item a {
-    color: #64748b;
-    &:hover { background: rgba(0,0,0,0.05); color: #1e293b; }
-    &.active { background: rgba(251,191,36,0.15); color: #b45309; }
+    color: #475569;
+    &:hover {
+      background: rgba(22, 163, 74, 0.06);
+      color: #166534;
+    }
+    &.active {
+      background: rgba(22, 163, 74, 0.12);
+      color: #15803d;
+    }
   }
 
-  .nav-group-label { color: #94a3b8; &:hover { color: #64748b; } }
+  .nav-group-label {
+    color: #94a3b8;
+    &:hover {
+      color: #15803d;
+    }
+  }
 
-  .sidebar-footer { border-top-color: #e2e8f0; }
+  .sidebar-footer {
+    border-top-color: #d1fae5;
+  }
 
-  .sidebar-user-name { color: #1e293b; }
-  .sidebar-user-role { color: #94a3b8; }
+  .sidebar-user-name {
+    color: #1e293b;
+  }
+  .sidebar-user-role {
+    color: #16a34a;
+  }
 
   .sidebar-collapse-btn {
-    border-color: #e2e8f0;
+    border-color: #d1fae5;
     color: #94a3b8;
-    &:hover { background: rgba(0,0,0,0.05); color: #1e293b; }
+    &:hover {
+      background: rgba(22, 163, 74, 0.08);
+      color: #15803d;
+    }
   }
 
   .mobile-topbar {
-    background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);
+    background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
   }
 
-  .admin-content { background-color: #f1f5f9; color: #1e293b; }
+  .admin-content {
+    background-color: #f0fdf4;
+    color: #1e293b;
+  }
 }
