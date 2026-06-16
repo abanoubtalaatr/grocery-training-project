@@ -3,6 +3,7 @@
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,14 +16,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return response()->json([
-        'name' => config('app.name'),
-        'message' => 'Welcome to Grocery API',
-        'version' => '1.0.0',
-        'documentation' => '/api/documentation',
-    ]);
-});
+// Route::get('/', function () {
+//     return response()->json([
+//         'name' => config('app.name'),
+//         'message' => 'Welcome to Grocery API',
+//         'version' => '1.0.0',
+//         'documentation' => '/api/documentation',
+//     ]);
+// });
 
 Route::prefix('chat')->group(function () {
     Route::get('/', [WebChatController::class, 'index'])->name('chat');
@@ -34,3 +35,20 @@ Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
 });
+
+
+
+Route::get('/language/{locale}', function ($locale) {
+    abort_unless(in_array($locale, ['en', 'ar']), 404);
+
+    session(['locale' => $locale]);
+
+    return back();
+})->name('language.switch');
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+    Route::resource('categories', CategoryController::class);
+    }
+    );
