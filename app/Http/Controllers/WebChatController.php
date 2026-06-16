@@ -2,40 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Services\ChatbotService;
+use App\Actions\WebChat\ProcessChatMessageAction;
+use App\Http\Requests\WebChat\SendMessageRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Throwable;
 
 class WebChatController extends Controller
 {
-    public function __construct(private readonly ChatbotService $chatbotService) {}
-
     public function index()
     {
         return view('chat');
     }
 
-    public function send(Request $request): JsonResponse
+    public function send(SendMessageRequest $request, ProcessChatMessageAction $action): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'message' => ['required', 'string', 'max:1000'],
-            ]);
-
-            $message = trim($validated['message']);
-            $user = $this->getOrCreateDemoUser();
+            $validated = $request->validated();
             $conversationId = session('chat_conversation_id');
 
-            $result = $this->chatbotService->chat(
-                user: $user,
-                question: $message,
+            $result = $action(
+                message: $validated['message'],
                 conversationId: $conversationId,
-                locale: null,
             );
 
             session(['chat_conversation_id' => $result['conversation_id']]);
@@ -59,18 +48,4 @@ class WebChatController extends Controller
 
         return response()->json(['reset' => true]);
     }
-
-    private function getOrCreateDemoUser(): User
-    {
-        return User::firstOrCreate(
-            ['email' => 'webchat@grocery.demo'],
-            [
-                'firstname' => 'Web',
-                'lastname' => 'Chat Demo',
-                'username' => 'webchat_demo',
-                'password' => Hash::make(Str::random(32)),
-            ]
-        );
-    }
-
 }

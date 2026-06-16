@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
@@ -10,23 +10,23 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\VerifyOtpRequest;
-use App\Services\AuthService;
+use App\Actions\Auth\RegisterAction;
+use App\Actions\Auth\LoginAction;
+use App\Actions\Auth\LogoutAction;
+use App\Actions\Auth\SendForgotPasswordOtpAction;
+use App\Actions\Auth\VerifyOtpAction;
+use App\Actions\Auth\ResetPasswordAction;
+use App\Actions\Auth\DeleteAccountAction;
+use App\Actions\Auth\ChangePasswordAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function __construct(
-        protected AuthService $authService
-    ) {}
-
-    /**
-     * Register a new user
-     */
-    public function register(RegisterRequest $request): JsonResponse
+    public function register(RegisterRequest $request, RegisterAction $action): JsonResponse
     {
         try {
-            $result = $this->authService->register($request->validated());
+            $result = $action($request->validated());
 
             return response()->json([
                 'success' => true,
@@ -51,13 +51,10 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Login user
-     */
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request, LoginAction $action): JsonResponse
     {
         try {
-            $result = $this->authService->login(
+            $result = $action(
                 $request->input('login'),
                 $request->input('password')
             );
@@ -90,13 +87,10 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Logout user
-     */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request, LogoutAction $action): JsonResponse
     {
         try {
-            $this->authService->logout($request->user());
+            $action($request->user());
 
             return response()->json([
                 'success' => true,
@@ -111,14 +105,10 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Forgot password - send OTP
-     */
-    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    public function forgotPassword(ForgotPasswordRequest $request, SendForgotPasswordOtpAction $action): JsonResponse
     {
-
         try {
-            $this->authService->forgotPassword($request->input('identifier'));
+            $action($request->input('identifier'));
 
             return response()->json([
                 'success' => true,
@@ -133,13 +123,10 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Verify OTP
-     */
-    public function verifyOtp(VerifyOtpRequest $request): JsonResponse
+    public function verifyOtp(VerifyOtpRequest $request, VerifyOtpAction $action): JsonResponse
     {
         try {
-            $isValid = $this->authService->verifyOtp(
+            $isValid = $action(
                 $request->input('identifier'),
                 $request->input('otp')
             );
@@ -164,13 +151,10 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Reset password
-     */
-    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    public function resetPassword(ResetPasswordRequest $request, ResetPasswordAction $action): JsonResponse
     {
         try {
-            $this->authService->resetPassword(
+            $action(
                 $request->input('identifier'),
                 $request->input('otp'),
                 $request->input('password')
@@ -195,9 +179,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * Get authenticated user
-     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([
@@ -216,10 +197,10 @@ class AuthController extends Controller
         ]);
     }
 
-    public function deleteAccount(DeleteAccountRequest $request): JsonResponse
+    public function deleteAccount(DeleteAccountRequest $request, DeleteAccountAction $action): JsonResponse
     {
         try {
-            $this->authService->deleteAccount($request->user());
+            $action($request->user());
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -234,21 +215,10 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Change password for authenticated user
-     */
-    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    public function changePassword(ChangePasswordRequest $request, ChangePasswordAction $action): JsonResponse
     {
         try {
-            $user = $request->user();
-
-            // Let the User model's "hashed" cast hash the plain password once (avoid double hashing).
-            $user->update([
-                'password' => $request->input('password'),
-            ]);
-
-            // Revoke all tokens except the current one (optional - for security)
-            // $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
+            $action($request->user(), $request->input('password'));
 
             return response()->json([
                 'success' => true,
