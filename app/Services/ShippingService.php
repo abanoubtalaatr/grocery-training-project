@@ -12,7 +12,6 @@ class ShippingService
      *
      * @param  float  $subtotal  Cart/order subtotal (after item discounts)
      * @param  string  $deliveryType  'delivery' or 'pickup'
-     * @return float
      */
     public function calculateShippingFee(float $subtotal, string $deliveryType): float
     {
@@ -31,5 +30,22 @@ class ShippingService
         }
 
         return $fee;
+    }
+
+    public function calculateOrderTotals($cart, float $shippingFee): array
+    {
+        $subtotal = (float) $cart->subtotal;
+        $tax = (float) $cart->tax;
+        $discount = (float) $cart->discount;
+
+        $total = $subtotal + $tax + $shippingFee - $discount;
+
+        return [
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'discount' => $discount,
+            'shipping_fee' => $shippingFee,
+            'total' => $total,
+        ];
     }
 }

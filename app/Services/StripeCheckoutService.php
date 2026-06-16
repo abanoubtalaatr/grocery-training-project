@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Exceptions\AmountToPayValidationException;
+use App\Exceptions\PaymentException;
 use App\Models\Order;
 use App\Models\User;
 use Stripe\Checkout\Session;
+use Stripe\PaymentIntent;
 use Stripe\Stripe;
 
 class StripeCheckoutService
@@ -48,5 +51,52 @@ class StripeCheckoutService
             'success_url' => $successUrl,
             'cancel_url' => str_replace('{ORDER_ID}', (string) $order->id, $cancelUrl),
         ]);
+    }
+
+    public function validateTotal(float $calculatedTotal, float $providedTotal): void
+    {
+        if (abs($calculatedTotal - $providedTotal) > 0.1) {
+            throw new AmountToPayValidationException('Provided total does not match calculated total.', 422,
+                [
+                    'calculated_total' => $calculatedTotal,
+                    'provided_amount' => $providedTotal,
+                ]);
+        }
+    }
+
+    public function processPayment($user, array $validated, float $total): array
+    {
+        if ($validated['payment_method'] !== 'card') {
+            return ['success' => true];
+        }
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        if (! $user->stripe_customer_id) {
+            throw new PaymentException('Stripe customer not found. Please add a payment method first.', 400);
+        }
+
+        try {
+            $paymentIntent = PaymentIntent::create([
+                'amount' => (int) ($total * 100),
+                'currency' => 'usd',
+                'customer' => $user->stripe_customer_id,
+                'payment_method' => $validated['payment_method_id'],
+                'off_session' => true,
+                'confirm' => true,
+            ]);
+
+            if ($paymentIntent->status !== 'succeeded') {
+                throw new PaymentException('Payment failed with status: '.$paymentIntent->status);
+            }
+
+            return [
+                'success' => true,
+                'stripe_payment_intent_id' => $paymentIntent->id,
+            ];
+
+        } catch (\Throwable $e) {
+            throw new PaymentException('Payment processing failed: '.$e->getMessage(), 422);
+        }
     }
 }
