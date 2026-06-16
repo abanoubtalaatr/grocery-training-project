@@ -100,7 +100,7 @@ class AddressController extends Controller
                 }
             });
 
-            return $this->successResponse('Address deleted successfully');
+            return $this->successResponse('Address deleted successfully',200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return $this->errorResponse('Address not found', null, 404);
         } catch (\Exception $e) {
