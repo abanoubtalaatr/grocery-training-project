@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\AuthService;
 use App\Services\UserAppSettingsService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DataManagementController extends Controller
 {
+    use ApiResponse;
+    
     public function __construct(
         private readonly UserAppSettingsService $settingsService,
         private readonly AuthService $authService,
@@ -22,7 +25,7 @@ class DataManagementController extends Controller
         $payload = $this->settingsService->buildDataExport($user);
         $filename = 'grocery-user-data-'.$user->id.'-'.now()->format('Y-m-d').'.json';
 
-        return response()->streamDownload(function () use ($payload) {
+        return $this->streamDownload(function () use ($payload) {
             echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }, $filename, [
             'Content-Type' => 'application/json',
@@ -31,12 +34,11 @@ class DataManagementController extends Controller
 
     public function delete(Request $request): JsonResponse
     {
-        $user = $request->user();
-        $this->authService->deleteAccount($user);
+        $this->authService->deleteUserAccount($request->user());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Account deleted successfully',
-        ]);
+        return $this->successResponse(
+            'Account deleted successfully',
+            
+        );
     }
 }

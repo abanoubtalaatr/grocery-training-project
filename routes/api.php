@@ -114,11 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Address routes
     Route::prefix('addresses')->group(function () {
-        Route::get('/', [AddressController::class, 'index']);
-        Route::post('/', [AddressController::class, 'store']);
-        Route::get('/{id}', [AddressController::class, 'show']);
-        Route::put('/{id}', [AddressController::class, 'update']);
-        Route::delete('/{id}', [AddressController::class, 'destroy']);
+        Route::apiResource('/', AddressController::class);
         Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
     });
 
@@ -169,9 +165,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Favorites routes
     Route::prefix('favorites')->group(function () {
         Route::get('/', [FavoriteController::class, 'index']);
-        Route::post('/{mealId}/toggle', [FavoriteController::class, 'toggle']);
-        Route::get('/{mealId}/check', [FavoriteController::class, 'check']);
-        Route::delete('/{mealId}', [FavoriteController::class, 'remove']);
+        Route::get('/{mealId}', [FavoriteController::class, 'show']);
+        Route::post('/{mealId}', [FavoriteController::class, 'store']);
+        Route::delete('/{mealId}', [FavoriteController::class, 'destroy']);
     });
 
     // Chatbot routes
@@ -246,7 +242,6 @@ Route::get('brands', [MealController::class, 'brands']);
 Route::get('more-to-explore', [MealController::class, 'moreToExplore']);
 Route::get('settings', [SettingController::class, 'index']);
 Route::get('special-notes', [SpecialNoteController::class, 'index']);
-// Categories routes
 
 Route::prefix('offers')->group(function () {
     Route::get('/', [OfferController::class, 'index']);
@@ -254,9 +249,11 @@ Route::prefix('offers')->group(function () {
     Route::get('/validate', [OfferController::class, 'validateOffer']);
     Route::get('/{code}', [OfferController::class, 'showByCode']);
 });
+    
+// Categories routes
+
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/{id}', [CategoryController::class, 'show']);
+    Route::apiResource('/', CategoryController::class);
     Route::get('/{id}/meals', [CategoryController::class, 'meals']);
 });
 
@@ -266,7 +263,7 @@ Route::prefix('subcategories')->group(function () {
     Route::get('/{id}', [SubcategoryController::class, 'show']);
     Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
 });
-Route::get('/faqs', [FaqController::class, 'index']);
+Route::apiResource('faqs', FaqController::class);
 Route::get('/pages', [StaticPageController::class, 'index']);
 Route::get('/pages/slug/{slug}', [StaticPageController::class, 'showBySlug']);
 Route::get('/pages/important', [StaticPageController::class, 'importantPages']);

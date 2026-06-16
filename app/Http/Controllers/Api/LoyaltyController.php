@@ -4,32 +4,30 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\LoyaltyService;
+use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LoyaltyController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private readonly LoyaltyService $loyaltyService,
     ) {}
 
     /**
-     * Loyalty & rewards summary for the authenticated user.
+     * Loyalty & rewards summary.
      */
-    public function index(Request $request): JsonResponse
-    {
-        try {
-            return response()->json([
-                'success' => true,
-                'message' => 'Loyalty data retrieved successfully',
-                'data' => $this->loyaltyService->buildSummary($request->user()),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve loyalty data',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    public function index(
+        Request $request
+    ): JsonResponse {
+
+        return $this->successResponse(
+            'Loyalty data retrieved successfully',
+            $this->loyaltyService->buildSummary(
+                $request->user()
+            )
+        );
     }
 }
