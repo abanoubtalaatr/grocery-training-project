@@ -3,6 +3,7 @@
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,4 +40,4 @@ Route::prefix('payment')->group(function () {
 /**
  * New Routes for the Dashbaord
  */
-// Route::
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -1,0 +1,79 @@
+// resources/scss/app.scss
+
+// 1. Import Bootstrap functions/variables/mixins first
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+
+// 2. FilamentPHP-inspired Basic Colors & Overrides
+$filament-primary: #fbbf24; // Amber 400
+$filament-primary-dark: #f59e0b; // Amber 500
+$filament-success: #22c55e; // Green 500
+$filament-danger: #ef4444; // Red 500
+$filament-warning: #f59e0b; // Amber 500
+$filament-info: #3b82f6; // Blue 500
+$filament-gray: #64748b; // Slate 500
+$filament-dark: #111827; // Gray 900
+
+// Map these to legacy variables used in the project or update them
+$orange: $filament-primary;
+$orange-light: rgba($filament-primary, 0.4);
+$blue: $filament-dark;
+$blue-dark: darken($filament-dark, 5%);
+$blue-light: $filament-info;
+
+// ============================================================================
+// Add your colors to Bootstrap's theme map
+$theme-colors: map-merge(
+  $theme-colors,
+  (
+    "primary": $filament-primary,
+    "success": $filament-success,
+    "danger": $filament-danger,
+    "warning": $filament-warning,
+    "info": $filament-info,
+    "secondary": $filament-gray,
+    "dark": $filament-dark,
+    "orange": $orange,
+    "blue-custom": $blue,
+  )
+);
+
+// Modern Rounded Corners (Filament style)
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+
+// Override focus color
+$input-focus-border-color: $filament-primary;
+$input-focus-box-shadow: 0 0 0 0.15rem rgba($filament-primary, 0.25);
+
+$nav-link-color: $filament-primary-dark;
+$nav-link-hover-color: darken($filament-primary, 15%);
+
+// For the shadows (Filament style: neutral and subtle)
+$box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$box-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$box-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+
+// 3. Import the rest of Bootstrap
+@import "bootstrap/scss/bootstrap";
+
+// 4. Your custom components (AFTER Bootstrap)
+.btn-orange {
+  @include button-variant($orange, $orange);
+}
+
+.btn-outline-orange {
+  @include button-outline-variant($orange);
+}
+
+.btn-blue {
+  @include button-variant($blue, $blue);
+}
+
+.btn-outline-blue {
+  @include button-outline-variant($blue);
+}
