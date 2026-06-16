@@ -30,12 +30,17 @@ use App\Http\Controllers\Api\StripeCheckoutController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Api\SubcategoryController;
+use App\Jobs\CreateInvoiceJob;
+use App\Jobs\SendEmailJob;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\UserAppSettingsController;
 use App\Http\Controllers\Api\V1\CategoryController as ApiCategoryController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\MealController as ApiMealController;
 use Illuminate\Support\Facades\Route;
+use App\Traits\V1;
 
 use App\Jobs\SendInvoiceJob;
 /*
@@ -48,6 +53,30 @@ use App\Jobs\SendInvoiceJob;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get("/send-email", function (Request $request) {
+    $email = $request->query('email', 'omar-elsayed@example.com');
+
+    Bus::chain([
+        new SendEmailJob($email),
+        new CreateInvoiceJob($email),
+    ])->dispatch();
+
+    return response()->json([
+        "message" => "Email job dispatched successfully",
+        "email" => $email, 
+    ]);
+});
+
+Route::prefix("v1")->group(function(){
+   Route::get("/meals",[MealController::class,"index"]);
+});
+
+
+
+
+
+
+
 
 
 
