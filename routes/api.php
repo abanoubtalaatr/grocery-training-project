@@ -40,6 +40,17 @@ use App\Http\Controllers\Api\V1\SubcategoryController as ApiSubcategoryControlle
 use App\Http\Controllers\Api\V1\ReviewController as ApiReviewController;
 use App\Http\Controllers\Api\V1\InvoiceController as ApiInvoiceController;
 use App\Http\Controllers\Api\Addresses\SetDefaultAddressController;
+use App\Http\Controllers\Api\CategoryMealsController;
+use App\Http\Controllers\Api\Meals\SliderController;
+use App\Http\Controllers\Api\Meals\HotController;
+use App\Http\Controllers\Api\Meals\TodayController;
+use App\Http\Controllers\Api\Meals\RecommendationsController;
+use App\Http\Controllers\Api\Meals\BestSellsController;
+use App\Http\Controllers\Api\Meals\MoreToExploreController;
+use App\Http\Controllers\Api\Meals\BrandsController;
+use App\Http\Controllers\Api\Meals\NewProductsController;
+use App\Http\Controllers\Api\Meals\FrequencyController;
+use App\Http\Controllers\Api\SubcategoryMealsController;
 
 
 
@@ -210,24 +221,24 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Personalized "frequency" meals (requires auth — uses order history)
-    Route::get('/frequency', [MealController::class, 'frequency']);
+    Route::get('/frequency', FrequencyController::class);
 });
 
 // Meals routes
 Route::prefix('meals')->group(function () {
-    Route::get('/today', [MealController::class, 'today']);
-    Route::get('hot', [MealController::class, 'hot']);
+    Route::get('/today', TodayController::class);
+    Route::get('hot', HotController::class);
 
-    Route::get('/recommendations', [MealController::class, 'recommendations']);
+    Route::get('/recommendations', RecommendationsController::class);
     Route::get('/', [MealController::class, 'index']);
     Route::get('/{id}', [MealController::class, 'show']);
 
 });
-Route::get('/new-products', [MealController::class, 'newProducts']);
-Route::get('best-sells', [MealController::class, 'bestSells']);
-Route::get('sliders', [MealController::class, 'slider']);
-Route::get('brands', [MealController::class, 'brands']);
-Route::get('more-to-explore', [MealController::class, 'moreToExplore']);
+Route::get('/new-products', NewProductsController::class);
+Route::get('best-sells', BestSellsController::class);
+Route::get('sliders', SliderController::class);
+Route::get('brands', BrandsController::class);
+Route::get('more-to-explore', MoreToExploreController::class);
 Route::get('settings', [SettingController::class, 'index']);
 Route::get('special-notes', [SpecialNoteController::class, 'index']);
 // Categories routes
@@ -239,16 +250,14 @@ Route::prefix('offers')->group(function () {
     Route::get('/{code}', [OfferController::class, 'showByCode']);
 });
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/{id}', [CategoryController::class, 'show']);
-    Route::get('/{id}/meals', [CategoryController::class, 'meals']);
+    Route::apiResource('/', CategoryController::class);
+    Route::get('/{id}/meals', CategoryMealsController::class);
 });
 
 // Subcategories routes
 Route::prefix('subcategories')->group(function () {
-    Route::get('/', [SubcategoryController::class, 'index']);
-    Route::get('/{id}', [SubcategoryController::class, 'show']);
-    Route::get('/{id}/meals', [SubcategoryController::class, 'meals']);
+    Route::apiResource('/', SubcategoryController::class);
+    Route::get('/{id}/meals', SubcategoryMealsController::class);
 });
 Route::get('/faqs', [FaqController::class, 'index']);
 Route::get('/pages', [StaticPageController::class, 'index']);
