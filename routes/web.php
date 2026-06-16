@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
@@ -35,3 +37,33 @@ Route::prefix('payment')->group(function () {
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
     
 });
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [DashboardController::class, 'index']
+        )->name('dashboard');
+
+        Route::get('/users', [UserController::class, 'index'])
+            ->name('users.index');
+
+    });
+
+Route::get('/language/{locale}', function ($locale) {
+
+    abort_unless(
+        in_array($locale, ['ar', 'en']),
+        404
+    );
+
+    session()->put('locale', $locale);
+
+    return back();
+
+})->name('language.switch');
+// Route::get('/admin', function () {
+//     return 'Admin Dashboard Works';
+// });
