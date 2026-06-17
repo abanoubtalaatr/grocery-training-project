@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Admin\UserService;
+use App\Services\Admin\CategoryService;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class CategoryController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private CategoryService $categoryService
     ) {}
 
     public function index(Request $request)
     {
-        $users = $this->userService->paginate(
+        $categories = $this->categoryService->paginate(
             search: $request->search
         );
 
         return view(
-            'admin.users.index',
-            compact('users')
+            'admin.categories.index',
+            compact('categories')
         );
     }
 }

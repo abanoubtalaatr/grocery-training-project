@@ -192,4 +192,24 @@ class Order extends Model
         // Nothing found
         return null;
     }
+
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match ($this->status) {
+
+            'placed' => 'warning',
+
+            'processing' => 'info',
+
+            'shipping' => 'primary',
+
+            'out_for_delivery' => 'secondary',
+
+            'delivered' => 'success',
+
+            'cancelled' => 'danger',
+
+            default => 'dark',
+        };
+    }
 }

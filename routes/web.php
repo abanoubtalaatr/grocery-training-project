@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MealController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
@@ -49,6 +52,21 @@ Route::prefix('admin')
 
         Route::get('/users', [UserController::class, 'index'])
             ->name('users.index');
+
+        Route::get(
+            '/categories',
+            [CategoryController::class, 'index']
+        )->name('categories.index');
+
+        Route::get(
+            '/meals',
+            [MealController::class, 'index']
+        )->name('meals.index');
+
+        Route::get(
+            '/orders',
+            [OrderController::class, 'index']
+        )->name('orders.index');
 
     });
 

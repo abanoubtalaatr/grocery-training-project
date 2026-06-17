@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Admin\UserService;
+use App\Services\Admin\OrderService;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class OrderController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private OrderService $orderService
     ) {}
 
     public function index(Request $request)
     {
-        $users = $this->userService->paginate(
+        $orders = $this->orderService->paginate(
             search: $request->search
         );
 
         return view(
-            'admin.users.index',
-            compact('users')
+            'admin.orders.index',
+            compact('orders')
         );
     }
 }

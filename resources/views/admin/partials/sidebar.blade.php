@@ -48,7 +48,7 @@
         <li class="nav-item mb-2">
             <a
                 href="{{ route('admin.dashboard') }}"
-                class="nav-link text-white
+                class="nav-link text-white bi-speedometer2
                 {{ request()->routeIs('admin.dashboard')
                     ? 'active bg-primary rounded'
                     : '' }}">
@@ -59,8 +59,13 @@
 
         <li class="nav-item mb-2">
             <a
-                {{-- href="{{ route('admin.Users') }}" --}}
-                class="nav-link text-white">
+                href="{{ route('admin.users.index') }}"
+                <a
+                    href="{{ route('admin.users.index') }}"
+                    class="nav-link text-white bi-people
+                    {{ request()->routeIs('admin.users.*')
+                        ? 'active bg-primary rounded'
+                        : '' }}">
 
                 {{ __('sidebar.users') }}
             </a>
@@ -69,8 +74,11 @@
 
         <li class="nav-item mb-2">
             <a
-                {{-- href="{{ route('admin.Meals') }}" --}}
-                class="nav-link text-white">
+                href="{{ route('admin.meals.index') }}"
+                class="nav-link text-white bi-cup-hot
+                {{ request()->routeIs('admin.meals.*')
+                    ? 'active bg-primary rounded'
+                    : '' }}">
 
                 {{ __('sidebar.meals') }}
             </a>
@@ -79,8 +87,11 @@
 
         <li class="nav-item mb-2">
             <a
-                {{-- href="{{ route('admin.Categories') }}" --}}
-                class="nav-link text-white">
+                href="{{ route('admin.categories.index') }}"
+                class="nav-link text-white bi-grid
+                {{ request()->routeIs('admin.categories.*')
+                    ? 'active bg-primary rounded'
+                    : '' }}">
 
                 {{ __('sidebar.categories') }}
             </a>
@@ -89,8 +100,11 @@
 
         <li class="nav-item mb-2">
             <a
-                {{-- href="{{ route('admin.Orders') }}" --}}
-                class="nav-link text-white">
+                href="{{ route('admin.orders.index') }}"
+                class="nav-link text-white bi-bag-check
+                {{ request()->routeIs('admin.orders.*')
+                    ? 'active bg-primary rounded'
+                    : '' }}">
 
                 {{ __('sidebar.orders') }}
             </a>

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Meal;
 use App\Observers\MealObserver;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +23,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Meal::observe(MealObserver::class);
+        Paginator::useBootstrapFive();
     }
 }

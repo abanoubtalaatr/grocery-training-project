@@ -3,24 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Admin\UserService;
+use App\Services\Admin\MealService;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class MealController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private MealService $mealService
     ) {}
 
     public function index(Request $request)
     {
-        $users = $this->userService->paginate(
+        $meals = $this->mealService->paginate(
             search: $request->search
         );
 
         return view(
-            'admin.users.index',
-            compact('users')
+            'admin.meals.index',
+            compact('meals')
         );
     }
 }
