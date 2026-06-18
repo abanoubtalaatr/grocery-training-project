@@ -35,3 +35,6 @@ Route::prefix('payment')->group(function () {
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
     
 });
+
+
+require_once __DIR__ . '/admin.php';
