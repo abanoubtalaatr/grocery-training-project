@@ -28,7 +28,7 @@ class AuthController extends Controller
         try {
             $result = $this->authService->register($request->validated());
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Registration successful',
                 'data' => [
@@ -43,7 +43,7 @@ class AuthController extends Controller
                 ],
             ], 201);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Registration failed',
                 'error' => $e->getMessage(),
@@ -62,7 +62,7 @@ class AuthController extends Controller
                 $request->input('password')
             );
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Login successful',
                 'data' => [
@@ -76,13 +76,13 @@ class AuthController extends Controller
                 ],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Login failed',
                 'errors' => $e->errors(),
             ], 401);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Login failed',
                 'error' => $e->getMessage(),
@@ -98,12 +98,12 @@ class AuthController extends Controller
         try {
             $this->authService->logout($request->user());
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Logout successful',
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Logout failed',
                 'error' => $e->getMessage(),
@@ -120,12 +120,12 @@ class AuthController extends Controller
         try {
             $this->authService->forgotPassword($request->input('identifier'));
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'OTP sent successfully. Please check your email or phone.',
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to send OTP',
                 'error' => $e->getMessage(),
@@ -145,18 +145,18 @@ class AuthController extends Controller
             );
 
             if (! $isValid) {
-                return response()->json([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Invalid or expired OTP',
                 ], 400);
             }
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'OTP verified successfully',
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'OTP verification failed',
                 'error' => $e->getMessage(),
@@ -176,18 +176,18 @@ class AuthController extends Controller
                 $request->input('password')
             );
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Password reset successfully',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Password reset failed',
                 'errors' => $e->errors(),
             ], 400);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Password reset failed',
                 'error' => $e->getMessage(),
@@ -200,7 +200,7 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'data' => [
                 'user' => [
@@ -221,14 +221,14 @@ class AuthController extends Controller
         try {
             $this->authService->deleteAccount($request->user());
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to delete account',
                 'error' => $e->getMessage(),
             ], 500);
         }
 
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'message' => 'Account deleted successfully',
         ]);
@@ -250,12 +250,12 @@ class AuthController extends Controller
             // Revoke all tokens except the current one (optional - for security)
             // $user->tokens()->where('id', '!=', $request->user()->currentAccessToken()->id)->delete();
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Password changed successfully',
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to change password',
                 'error' => $e->getMessage(),

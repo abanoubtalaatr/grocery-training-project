@@ -11,7 +11,7 @@ use App\Actions\Order\CreateOrderAction;
 use App\Actions\Order\GetOrdersAction;
 use App\Actions\Order\TrackOrderAction;
 use App\Http\Resources\OrderResource;
-use App\Traits\ApiResponse;
+use App\Traits\V1\ApiResponse;
 
 class OrderController extends Controller
 {

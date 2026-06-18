@@ -32,13 +32,13 @@ class CategoryController extends Controller
                     ];
                 });
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Categories retrieved successfully',
                 'data' => $categories,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve categories',
                 'error' => $e->getMessage(),
@@ -57,7 +57,7 @@ class CategoryController extends Controller
             }])
                 ->findOrFail($id);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Category retrieved successfully',
                 'data' => [
@@ -88,12 +88,12 @@ class CategoryController extends Controller
                 ],
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Category not found',
             ], 404);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve category',
                 'error' => $e->getMessage(),
@@ -189,7 +189,7 @@ class CategoryController extends Controller
                 });
 
             $total = $paginator->total();
-            return response()->json(array_merge([
+            return $this->jsonResponse(array_merge([
                 'success' => true,
                 'message' => $total === 0 ? 'No products match your filters.' : 'Meals retrieved successfully',
                 'data' => [

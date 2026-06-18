@@ -14,7 +14,7 @@ use App\Http\Resources\AddressResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Traits\ApiResponse;
+use App\Traits\V1\ApiResponse;
 
 class AddressController extends Controller
 {

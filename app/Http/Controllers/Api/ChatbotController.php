@@ -25,7 +25,7 @@ class ChatbotController extends Controller
         try {
             foreach (['question', 'message'] as $key) {
                 if ($request->hasFile($key)) {
-                    return response()->json([
+                    return $this->jsonResponse([
                         'success' => false,
                         'message' => 'Send the question as plain text, not as a file upload.',
                         'errors' => ['question' => ['The question must be a text value, not a file.']],
@@ -38,7 +38,7 @@ class ChatbotController extends Controller
             }
 
             if (is_array($request->input('question'))) {
-                return response()->json([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Send a single question text only.',
                     'errors' => ['question' => ['Multiple question values are not allowed.']],
@@ -56,7 +56,7 @@ class ChatbotController extends Controller
             $question = trim((string) $validated['question']);
 
             if ($question === '') {
-                return response()->json([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Validation failed',
                     'errors' => ['question' => ['A non-empty question is required.']],
@@ -65,7 +65,7 @@ class ChatbotController extends Controller
 
             $user = $request->user();
             if ($user === null) {
-                return response()->json(['success' => false, 'message' => 'Authentication required'], 401);
+                return $this->jsonResponse(['success' => false, 'message' => 'Authentication required'], 401);
             }
 
             $conversationId = $validated['conversation_id'] ?? $validated['session_id'] ?? null;
@@ -82,7 +82,7 @@ class ChatbotController extends Controller
                 $result['rating'] = $validated['rating'];
             }
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Chat response generated successfully',
                 'data' => [
@@ -96,7 +96,7 @@ class ChatbotController extends Controller
             ]);
 
         } catch (ValidationException $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
@@ -107,7 +107,7 @@ class ChatbotController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to process chat request',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
@@ -136,7 +136,7 @@ class ChatbotController extends Controller
                 'created_at' => $m->created_at,
             ]);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Chat history retrieved successfully',
                 'data' => [
@@ -154,7 +154,7 @@ class ChatbotController extends Controller
         } catch (\Exception $e) {
             Log::error('Chatbot history error', ['message' => $e->getMessage()]);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve chat history',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
@@ -186,7 +186,7 @@ class ChatbotController extends Controller
                 ['id' => 'offers',   'label' => 'Coupons & offers',   'question' => 'What promo codes or offers are available?'],
             ];
 
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'message' => 'Suggestions retrieved successfully',
             'data' => ['suggestions' => $suggestions],

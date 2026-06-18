@@ -23,7 +23,7 @@ class DashboardController extends Controller
         try {
             $user = $request->user();
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Dashboard data retrieved successfully',
                 'data' => [
@@ -35,7 +35,7 @@ class DashboardController extends Controller
                 ],
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve dashboard data',
                 'error' => $e->getMessage(),

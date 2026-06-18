@@ -26,7 +26,7 @@ class MealController extends Controller
 
             $user = $request->user();
             if ($user === null) {
-                return response()->json([
+                return $this->jsonResponse([
                     'success' => false,
                     'message' => 'Authentication required to view frequency meals.',
                 ], 401);
@@ -73,14 +73,14 @@ class MealController extends Controller
                 $payload['subcategory_id'] = $subcategoryId;
             }
 
-            return response()->json($payload);
+            return $this->jsonResponse($payload);
         } catch (Throwable $e) {
             Log::error('Frequency meals error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to load frequency meals',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error',
@@ -95,7 +95,7 @@ class MealController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'message' => 'More to explore retrieved successfully',
             'data' => $meals,
@@ -106,7 +106,7 @@ class MealController extends Controller
     {
         $brands = Meal::distinct()->pluck('brand');
 
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'message' => 'Brands retrieved successfully',
             'data' => $brands,
@@ -139,7 +139,7 @@ class MealController extends Controller
                 ];
             });
 
-        return response()->json([
+        return $this->jsonResponse([
             'success' => true,
             'message' => 'Today\'s meals retrieved successfully',
             'data' => $meals,
@@ -176,7 +176,7 @@ class MealController extends Controller
                 'data' => $meals,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve meals',
                 'error' => $e->getMessage(),
@@ -220,13 +220,13 @@ class MealController extends Controller
                     ];
                 });
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Hot meals retrieved successfully',
                 'data' => $meals,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve hot meals',
                 'error' => $e->getMessage(),
@@ -403,7 +403,7 @@ class MealController extends Controller
             $totalCount = $meals->count();
             $isEmpty = $totalCount === 0;
 
-            return response()->json(array_merge([
+            return $this->jsonResponse(array_merge([
                 'success' => true,
                 'message' => $isEmpty ? 'No products match your filters.' : 'Meals retrieved successfully',
                 'data' => $meals,
@@ -480,13 +480,13 @@ class MealController extends Controller
                 ];
             });
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Meal recommendations retrieved successfully',
                 'data' => $meals->values(),
             ]);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve recommendations',
                 'error' => $e->getMessage(),
@@ -526,7 +526,7 @@ class MealController extends Controller
                 'reviews' => fn ($q) => $q->approved()->with('user:id,username,firstname,lastname')->orderBy('created_at', 'desc'),
             ])->findOrFail($id);
 
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => true,
                 'message' => 'Meal retrieved successfully',
                 'data' => [
@@ -597,12 +597,12 @@ class MealController extends Controller
                 ],
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Meal not found',
             ], 404);
         } catch (\Exception $e) {
-            return response()->json([
+            return $this->jsonResponse([
                 'success' => false,
                 'message' => 'Failed to retrieve meal',
                 'error' => $e->getMessage(),

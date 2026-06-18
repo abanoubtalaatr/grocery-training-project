@@ -34,7 +34,7 @@ class ContactController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return $this->jsonResponse([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ], 422);
@@ -42,7 +42,7 @@ class ContactController extends Controller
 
         // Check for spam (simple check for demo)
         if ($this->isSpam($request->message, $request->email)) {
-            return response()->json([
+            return $this->jsonResponse([
                 'message' => 'Your message appears to be spam',
             ], 400);
         }
@@ -71,7 +71,7 @@ class ContactController extends Controller
             Log::error('Failed to send contact email: '.$e->getMessage());
         }
 
-        return response()->json([
+        return $this->jsonResponse([
             'message' => 'Thank you for your message. We will get back to you soon.',
             'data' => new ContactMessageResource($contactMessage),
         ], 201);
@@ -149,7 +149,7 @@ class ContactController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
+            return $this->jsonResponse([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ], 422);
@@ -160,7 +160,7 @@ class ContactController extends Controller
             'admin_notes' => $request->admin_notes,
         ]);
 
-        return response()->json([
+        return $this->jsonResponse([
             'message' => 'Status updated successfully',
             'data' => new ContactMessageResource($contactMessage),
         ]);
@@ -175,7 +175,7 @@ class ContactController extends Controller
 
         $contactMessage->delete();
 
-        return response()->json([
+        return $this->jsonResponse([
             'message' => 'Message deleted successfully',
         ]);
     }
@@ -205,7 +205,7 @@ class ContactController extends Controller
             ->orderBy('month')
             ->get();
 
-        return response()->json([
+        return $this->jsonResponse([
             'data' => [
                 'total' => $total,
                 'new' => $new,
