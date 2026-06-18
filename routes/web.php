@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\StripePaymentCallbackController;
+use App\Http\Controllers\WebAuthController;
 use App\Http\Controllers\WebChatController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,5 +34,22 @@ Route::prefix('chat')->group(function () {
 Route::prefix('payment')->group(function () {
     Route::get('/success', [StripePaymentCallbackController::class, 'success'])->name('payment.success');
     Route::get('/cancel', [StripePaymentCallbackController::class, 'cancel'])->name('payment.cancel');
-    
+});
+
+
+Route::middleware('auth.web')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::delete('logout', [WebAuthController::class, 'logout'])->name('logout');
+});
+
+Route::middleware('guest.web')->group(function () {
+    Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [WebAuthController::class, 'login'])->name('login');
+
+    Route::get('/register', [WebAuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [WebAuthController::class, 'register'])->name('register');
 });
