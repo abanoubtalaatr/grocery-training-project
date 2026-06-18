@@ -22,9 +22,9 @@
             </div>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="">
+            <a class="nav-link" href="{{ route('categories.index') }}">
                 <i class="mdi mdi-view-headline menu-icon"></i>
-                <span class="menu-title">Brands</span>
+                <span class="menu-title">Categories</span>
             </a>
         </li>
         <li class="nav-item">
@@ -34,50 +34,16 @@
             </a>
             <div class="collapse" id="products">
                 <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="">All
+                    <li class="nav-item"> <a class="nav-link" href="{{ route('products.index') }}">All
                             Products</a>
                     </li>
-                    <li class="nav-item"> <a class="nav-link" href="">Add New
+                    <li class="nav-item"> <a class="nav-link" href="{{ route('products.create') }}">Add New
                             Product</a>
                     </li>
                 </ul>
             </div>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="">
-                <i class="mdi mdi-palette menu-icon"></i>
-                <span class="menu-title">Colors</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="">
-                <i class="mdi mdi-grid-large menu-icon"></i>
-                <span class="menu-title">Sliders</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="">
-                <i class="mdi mdi-emoticon menu-icon"></i>
-                <span class="menu-title">Orders</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-                <i class="mdi mdi-account menu-icon"></i>
-                <span class="menu-title">User Pages</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="auth">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="pages/samples/login.html"> Login </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="pages/samples/login-2.html"> Login 2 </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="pages/samples/register.html"> Register </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="pages/samples/register-2.html"> Register 2 </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="pages/samples/lock-screen.html"> Lockscreen </a>
-                    </li>
-                </ul>
-            </div>
-        </li>
+
         <li class="nav-item">
             <a class="nav-link" href="documentation/documentation.html">
                 <i class="mdi mdi-file-document-box-outline menu-icon"></i>
