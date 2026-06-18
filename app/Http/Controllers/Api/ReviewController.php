@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
-use App\Http\Resources\ReviewResource;
+use App\Http\Resources\Api\ReviewResource;
 use App\Models\Review;
 use App\Models\Meal;
 use Illuminate\Http\JsonResponse;
@@ -21,32 +21,12 @@ class ReviewController extends Controller
     {
         $query = Review::query()
             ->with(['user', 'meal'])
+            ->filter($request)
             ->latest();
-        
-        // Apply filters
-        if ($request->has('meal_id')) {
-            $query->where('meal_id', $request->meal_id);
-        }
-        
-        if ($request->has('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-        
-        if ($request->has('rating')) {
-            $query->where('rating', $request->rating);
-        }
-        
-        if ($request->boolean('approved_only', true)) {
-            $query->approved();
-        }
-        
-        if ($request->has('min_rating')) {
-            $query->where('rating', '>=', $request->min_rating);
-        }
-        
+
         // Pagination
-        $perPage = $request->input('per_page', 15);
-        $reviews = $query->paginate($perPage);
+        $perPage = min(max((int) $request->input('per_page', 15), 1), 50);
+        $reviews = $query->paginate($perPage)->appends($request->query());
         
         return response()->json([
             'success' => true,

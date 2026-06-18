@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\SmartListController;
 use App\Http\Controllers\Api\SpecialNoteController;
@@ -265,7 +266,7 @@ Route::prefix('meals')->group(function () {
 
     Route::get('/recommendations', [MealController::class, 'recommendations']);
     Route::get('/', [MealController::class, 'index']);
-    Route::get('/{id}', [MealController::class, 'show']);
+    Route::get('/{id}', [MealController::class, 'show'])->name('meals.show');
 
 });
 Route::get('/new-products', [MealController::class, 'newProducts']);
@@ -275,6 +276,8 @@ Route::get('brands', [MealController::class, 'brands']);
 Route::get('more-to-explore', [MealController::class, 'moreToExplore']);
 Route::get('settings', [SettingController::class, 'index']);
 Route::get('special-notes', [SpecialNoteController::class, 'index']);
+Route::get('/reviews', [ReviewController::class, 'index']);
+Route::get('/reviews/{id}', [ReviewController::class, 'show'])->name('reviews.show');
 // Categories routes
 
 Route::prefix('offers')->group(function () {
