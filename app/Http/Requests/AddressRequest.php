@@ -2,43 +2,33 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AddressRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        $required = $this->isMethod('post') ? 'required' : 'sometimes';
-
         return [
+            'user_id' => ['required', 'exists:users,id'],
             'label' => ['nullable', 'string', 'max:255'],
-            'full_name' => [$required, 'string', 'min:2', 'max:255'],
-            'phone' => [$required, 'string', 'min:10', 'max:20', 'regex:/^\+?[1-9]\d{9,14}$/'],
-            'country_code' => ['nullable', 'string', 'max:5', 'regex:/^\+\d{1,4}$/'],
-            'street_address' => [$required, 'string', 'min:5', 'max:500'],
+            'full_name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
+            'country_code' => ['required', 'string', 'max:5'],
+            'street_address' => ['required', 'string', 'max:255'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'floor' => ['nullable', 'string', 'max:50'],
             'apartment' => ['nullable', 'string', 'max:50'],
             'landmark' => ['nullable', 'string', 'max:255'],
-            'city' => [$required, 'string', 'min:2', 'max:100'],
-            'state' => ['nullable', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:20'],
-            'country' => ['nullable', 'string', 'max:100'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'country' => ['required', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
             'is_default' => ['nullable', 'boolean'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
@@ -48,11 +38,13 @@ class AddressRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'full_name.min' => 'Full name must be at least 2 characters.',
-            'phone.min' => 'Phone number must be at least 10 digits.',
-            'phone.regex' => 'Please enter a valid phone number (with country code if needed).',
-            'street_address.min' => 'Street address must be at least 5 characters.',
-            'city.min' => 'City must be at least 2 characters.',
+            'user_id.required' => 'يجب اختيار المستخدم.',
+            'user_id.exists' => 'المستخدم المحدد غير موجود.',
+            'full_name.required' => 'الاسم الكامل مطلوب.',
+            'phone.required' => 'رقم الهاتف مطلوب.',
+            'street_address.required' => 'عنوان الشارع مطلوب.',
+            'city.required' => 'المدينة مطلوبة.',
+            'country.required' => 'الدولة مطلوبة.',
         ];
     }
 }

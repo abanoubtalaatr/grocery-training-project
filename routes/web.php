@@ -1,7 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\App;
 use App\Http\Controllers\StripePaymentCallbackController;
 use App\Http\Controllers\WebChatController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\DashboardControllet;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,15 +20,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return response()->json([
-        'name' => config('app.name'),
-        'message' => 'Welcome to Grocery API',
-        'version' => '1.0.0',
-        'documentation' => '/api/documentation',
-    ]);
-});
 
+Route::get('/', [DashboardControllet::class, 'index']);
+
+
+
+Route::prefix('admin')->group(function () {
+    Route::resource('addresses', AddressController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
+});
 Route::prefix('chat')->group(function () {
     Route::get('/', [WebChatController::class, 'index'])->name('chat');
     Route::post('/send', [WebChatController::class, 'send'])->name('chat.send');
