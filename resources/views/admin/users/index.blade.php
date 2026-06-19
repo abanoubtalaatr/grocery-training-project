@@ -29,6 +29,14 @@
 
                         </form>
 
+                        <a
+                            href="{{ route('admin.users.create') }}"
+                            class="btn btn-primary">
+
+                            Create User
+
+                        </a>
+
                     </div>
 
                 </div>
@@ -45,6 +53,7 @@
                         <th>{{__('users.email')}}</th>
                         <th>{{__('users.status')}}</th>
                         <th>{{__('users.joined')}}</th>
+                        <th>{{ __('users.actions') }}</th>
                     </tr>
                 </thead>
 
@@ -87,6 +96,36 @@
 
                             <td>
                                 {{ $user->created_at->format('Y-m-d') }}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{{ route('admin.users.edit', $user) }}"
+                                    class="btn btn-sm btn-warning">
+
+                                    Edit
+
+                                </a>
+
+                                <form
+                                    action="{{ route('admin.users.destroy', $user) }}"
+                                    method="POST"
+                                    class="d-inline">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-danger">
+
+                                        Delete
+
+                                    </button>
+
+                                </form>
+
                             </td>
 
                         </tr>

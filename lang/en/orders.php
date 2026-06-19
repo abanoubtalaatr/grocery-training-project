@@ -10,4 +10,5 @@ return [
     'date' => 'Date',
     'search_placeholder' => 'Search orders',
     'no_orders_found' => 'No orders found',
+    'actions' => 'Actions',
 ];

@@ -22,7 +22,11 @@ abstract class QueryFilter
         $this->builder = $builder;
 
         foreach ($this->filterableParameters() as $name => $value) {
-            if (method_exists($this, $name)) {
+
+            if (
+                method_exists($this, $name)
+                && filled($value)
+            ) {
                 $this->{$name}($value);
             }
         }
@@ -33,8 +37,8 @@ abstract class QueryFilter
     protected function filterableParameters(): array
     {
         return collect($this->request->keys())
-            ->filter(fn (string $key) => method_exists($this, $key))
-            ->mapWithKeys(fn (string $key) => [$key => $this->request->input($key)])
+            ->filter(fn(string $key) => method_exists($this, $key))
+            ->mapWithKeys(fn(string $key) => [$key => $this->request->input($key)])
             ->all();
     }
 }

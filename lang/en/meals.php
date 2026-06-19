@@ -15,4 +15,5 @@ return [
     'name' => 'Name',
     'meals_count' => 'Meals count',
     'created_at' => 'Created at',
+    'actions' => 'Actions',
 ];

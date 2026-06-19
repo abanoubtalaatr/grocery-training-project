@@ -9,4 +9,5 @@ return [
     'email' => 'Email',
     'status' => 'Status',
     'joined' => 'Joined',
+    'actions' => 'Actions',
 ];

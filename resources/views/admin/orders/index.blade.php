@@ -6,155 +6,175 @@
 
 @section('content')
 
-<div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0">
 
-    <div class="card-header bg-white">
+        <div class="card-header bg-white">
 
-        <div class="row align-items-center">
+            <div class="row align-items-center">
 
-            <div class="col">
+                <div class="col">
 
-                <h5 class="mb-0">
-                    {{ __('sidebar.orders') }}
-                </h5>
+                    <h5 class="mb-0">
+                        {{ __('sidebar.orders') }}
+                    </h5>
 
-                <small class="text-muted">
-                    {{ $orders->total() }}
-                    {{ __('sidebar.orders') }}
-                </small>
+                    <small class="text-muted">
+                        {{ $orders->total() }}
+                        {{ __('sidebar.orders') }}
+                    </small>
 
-            </div>
+                </div>
 
-            <div class="col-auto">
+                <div class="col-auto">
 
-                <form method="GET">
+                    <form method="GET">
 
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ request('search') }}"
-                        class="form-control"
-                        placeholder="{{ __('orders.search_placeholder') }}">
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                            placeholder="{{ __('orders.search_placeholder') }}">
 
-                </form>
+                    </form>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
+        <div class="card-body p-0">
 
-    <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
 
-        <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>{{ __('orders.order_number') }}</th>
+                        <th>{{ __('orders.customer') }}</th>
+                        <th>{{ __('orders.items') }}</th>
+                        <th>{{ __('orders.total') }}</th>
+                        <th>{{ __('orders.status') }}</th>
+                        <th>{{ __('orders.date') }}</th>
+                        <th>{{ __('orders.actions') }}</th>
+                    </tr>
+                </thead>
 
-            <thead>
-                <tr>
-                    <th>{{ __('orders.order_number') }}</th>
-                    <th>{{ __('orders.customer') }}</th>
-                    <th>{{ __('orders.items') }}</th>
-                    <th>{{ __('orders.total') }}</th>
-                    <th>{{ __('orders.status') }}</th>
-                    <th>{{ __('orders.date') }}</th>
-                </tr>
-            </thead>
+                <tbody>
 
-            <tbody>
+                    @forelse($orders as $order)
+                        <tr>
 
-@forelse($orders as $order)
+                            <td>
+                                {{ $order->order_number }}
+                            </td>
 
-<tr>
+                            <td>
 
-    <td>
-        {{ $order->order_number }}
-    </td>
+                                @if ($order->user)
+                                    <div>
 
-    <td>
+                                        <strong>
+                                            {{ $order->user->firstname }}
+                                            {{ $order->user->lastname }}
+                                        </strong>
 
-        @if($order->user)
+                                    </div>
 
-            <div>
+                                    <small class="text-muted">
+                                        {{ $order->user->email }}
+                                    </small>
+                                @else
+                                    -
+                                @endif
 
-                <strong>
-                    {{ $order->user->firstname }}
-                    {{ $order->user->lastname }}
-                </strong>
+                            </td>
 
-            </div>
+                            <td>
+                                {{ $order->items_count }}
+                            </td>
 
-            <small class="text-muted">
-                {{ $order->user->email }}
-            </small>
+                            <td>
+                                EGP {{ number_format($order->total, 2) }}
+                            </td>
 
-        @else
+                            <td>
 
-            -
+                                <span class="badge bg-{{ $order->status_badge_class }}">
 
-        @endif
+                                    {{ $order->status_description }}
 
-    </td>
+                                </span>
 
-    <td>
-        {{ $order->items_count }}
-    </td>
+                            </td>
 
-    <td>
-        EGP {{ number_format($order->total, 2) }}
-    </td>
+                            <td>
+                                {{ $order->created_at->format('Y-m-d') }}
+                            </td>
 
-    <td>
+                            <td>
 
-    <span
-        class="badge bg-{{ $order->status_badge_class }}">
+                                <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-info">
 
-        {{ $order->status_description }}
+                                    View
 
-    </span>
+                                </a>
 
-</td>
+                                <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-sm btn-warning">
 
-    <td>
-        {{ $order->created_at->format('Y-m-d') }}
-    </td>
+                                    Status
 
-</tr>
+                                </a>
 
-@empty
+                                <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="d-inline">
 
-<tr>
+                                    @csrf
+                                    @method('DELETE')
 
-    <td colspan="6" class="text-center py-4">
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Delete this order?')">
 
-        <div class="py-3">
+                                        Delete
 
-            <h6 class="mb-1">
-                {{ __('orders.no_orders_found') }}
-            </h6>
+                                    </button>
 
-            <small class="text-muted">
-                No orders have been placed yet.
-            </small>
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td colspan="6" class="text-center py-4">
+
+                                <div class="py-3">
+
+                                    <h6 class="mb-1">
+                                        {{ __('orders.no_orders_found') }}
+                                    </h6>
+
+                                    <small class="text-muted">
+                                        No orders have been placed yet.
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    @endforelse
+
+                </tbody>
+
+            </table>
 
         </div>
 
-    </td>
-
-</tr>
-
-@endforelse
-
-</tbody>
-
-        </table>
-
     </div>
 
-</div>
+    <div class="mt-3">
 
-<div class="mt-3">
+        {{ $orders->links() }}
 
-    {{ $orders->links() }}
-
-</div>
+    </div>
 
 @endsection

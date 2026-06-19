@@ -3,37 +3,37 @@
 namespace App\Services\Admin;
 
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class OrderService
 {
-    public function paginate(?string $search = null, int $perPage = 10)
+    public function paginate(
+    Request $request,
+    int $perPage = 10
+    )
     {
         return Order::query()
             ->with('user')
             ->withCount('items')
-            ->when($search, function ($query) use ($search) {
-
-                $query->where(function ($q) use ($search) {
-
-                    $q->where(
-                        'order_number',
-                        'like',
-                        "%{$search}%"
-                    )
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-
-                        $userQuery
-                            ->where('firstname', 'like', "%{$search}%")
-                            ->orWhere('lastname', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-
-                    });
-
-                });
-
-            })
+            ->filter($request)
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+
+    public function updateStatus(
+    Order $order,
+    string $status
+    ): bool {
+
+        return $order->update([
+            'status' => $status,
+        ]);
+    }
+
+    public function delete(Order $order): bool
+    {
+        return $order->delete();
     }
 }

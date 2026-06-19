@@ -31,6 +31,14 @@
 
                 </form>
 
+                <a
+                    href="{{ route('admin.categories.create') }}"
+                    class="btn btn-primary">
+
+                    Create Category
+
+                </a>
+
             </div>
 
         </div>
@@ -49,6 +57,7 @@
                     <th>{{ __('categories.meals_count') }}</th>
                     <th>{{ __('categories.status') }}</th>
                     <th>{{ __('categories.created_at') }}</th>
+                    <th> {{ __('categories.actions') }}</th>
                 </tr>
 
             </thead>
@@ -96,6 +105,37 @@
 
                         <td>
                             {{ $category->created_at->format('Y-m-d') }}
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{{ route('admin.categories.edit', $category) }}"
+                                class="btn btn-sm btn-warning">
+
+                                Edit
+
+                            </a>
+
+                            <form
+                                action="{{ route('admin.categories.destroy', $category) }}"
+                                method="POST"
+                                class="d-inline">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this category?')">
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
                         </td>
 
                     </tr>

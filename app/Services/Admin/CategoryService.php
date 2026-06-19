@@ -3,18 +3,35 @@
 namespace App\Services\Admin;
 
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class CategoryService
 {
-    public function paginate(?string $search = null, int $perPage = 10)
+    public function paginate(
+    Request $request,
+    int $perPage = 10
+    )
     {
         return Category::query()
             ->withCount('meals')
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            ->filter($request)
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    public function create(array $data): Category
+    {
+        return Category::create($data);
+    }
+
+    public function update(Category $category, array $data): bool
+    {
+        return $category->update($data);
+    }
+
+    public function delete(Category $category): bool
+    {
+        return $category->delete();
     }
 }

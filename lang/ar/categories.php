@@ -12,4 +12,6 @@ return [
 
     'search_placeholder' => 'البحث عن تصنيف',
     'no_categories_found' => 'لا توجد تصنيفات',
+
+    'actions' => 'الإجراءات',
 ];

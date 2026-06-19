@@ -12,4 +12,6 @@ return [
 
     'search_placeholder' => 'Search category',
     'no_categories_found' => 'No categories found',
+
+    'actions' => 'Actions',
 ];

@@ -50,23 +50,16 @@ Route::prefix('admin')
             [DashboardController::class, 'index']
         )->name('dashboard');
 
-        Route::get('/users', [UserController::class, 'index'])
-            ->name('users.index');
+        Route::resource('/users', UserController::class);
 
-        Route::get(
-            '/categories',
-            [CategoryController::class, 'index']
-        )->name('categories.index');
+        Route::resource('/categories', CategoryController::class);
 
-        Route::get(
-            '/meals',
-            [MealController::class, 'index']
-        )->name('meals.index');
+        Route::resource('/meals',MealController::class);
 
-        Route::get(
-            '/orders',
-            [OrderController::class, 'index']
-        )->name('orders.index');
+        Route::resource(
+            'orders',
+            OrderController::class
+        )->except(['create', 'store']);
 
     });
 
