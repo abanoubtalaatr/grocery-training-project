@@ -86,9 +86,12 @@
                             <h4 class="mb-3 fw-bold text-white"><i class="fas fa-list-check me-2 text-emerald"></i>{{ $loyaltyData['benefits']['tier_name'] }} Benefits</h4>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
                                 @forelse($loyaltyData['benefits']['items'] as $benefit)
-                                    <li class="d-flex align-items-center gap-2">
-                                        <i class="fas fa-check-circle text-emerald fs-5"></i>
-                                        <span class="text-white-50 small">{{ $benefit }}</span>
+                                    <li class="d-flex align-items-start gap-2">
+                                        <i class="fas fa-check-circle text-emerald fs-5 mt-1"></i>
+                                        <div>
+                                            <strong class="text-white small d-block">{{ $benefit['title'] }}</strong>
+                                            <span class="text-white-50 small">{{ $benefit['description'] }}</span>
+                                        </div>
                                     </li>
                                 @empty
                                     <li class="text-muted small">No specific benefits defined for this tier.</li>
