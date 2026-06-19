@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
             ContactMessageSeeder::class,
             SettingSeeder::class,
             SpecialNoteSeeder::class,
+            AdminUserSeeder::class,
+            SettingSeeder::class,
+            DashboardSeeder::class,
         ]);
     }
 }
