@@ -10,10 +10,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Concerns\Filterable;
 
 class User extends Authenticatable implements HasName
 {
-    use HasApiTokens, HasConversations, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasConversations, HasFactory, Notifiable, SoftDeletes, Filterable;
     use HasNotificationPreferences;
 
     /** Maximum length for API-validated usernames (registration and profile). */

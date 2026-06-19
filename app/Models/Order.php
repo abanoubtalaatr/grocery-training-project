@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Concerns\Filterable;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, Filterable;
 
     protected $fillable = [
         'user_id',
@@ -191,5 +192,25 @@ class Order extends Model
 
         // Nothing found
         return null;
+    }
+
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match ($this->status) {
+
+            'placed' => 'warning',
+
+            'processing' => 'info',
+
+            'shipping' => 'primary',
+
+            'out_for_delivery' => 'secondary',
+
+            'delivered' => 'success',
+
+            'cancelled' => 'danger',
+
+            default => 'dark',
+        };
     }
 }
