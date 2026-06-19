@@ -137,17 +137,65 @@ $box-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 // ADMIN LAYOUT WRAPPER
 // ============================================================================
 :root {
-  --page-bg: #0a1410; // very deep green-tinted charcoal (dark mode)
+  // Layout
+  --page-bg: #0a1410;
   --page-text: #e2e8f0;
-  --sidebar-bg: #022c22; // emerald-950
+  --sidebar-bg: #022c22;
   --content-bg: #0a1410;
+
+  // Dashboard cards
+  --dash-card-bg: #022c22;
+  --dash-card-bg-alt: #0f1a14;
+  --dash-card-bg-gradient: linear-gradient(135deg, #022c22 0%, #047857 100%);
+  --dash-card-border: rgba(52, 211, 153, 0.12);
+  --dash-card-inner-bg: rgba(0, 0, 0, 0.2);
+  --dash-icon-bg: rgba(0, 0, 0, 0.3);
+
+  // Dashboard text
+  --dash-text: #e2e8f0;
+  --dash-text-muted: #94a3b8;
+  --dash-text-subtle: rgba(255, 255, 255, 0.5);
+  --dash-text-accent: #34d399;
+
+  // Dashboard components
+  --dash-progress-bg: #0f1a14;
+  --dash-code-bg: #000000;
+  --dash-badge-border: rgba(52, 211, 153, 0.4);
+  --dash-input-bg: #0f1a14;
+  --dash-input-border: rgba(52, 211, 153, 0.2);
+  --dash-input-text: #e2e8f0;
+  --dash-table-stripe: rgba(52, 211, 153, 0.04);
 }
 
 [data-theme="light"] {
-  --page-bg: #f0fdf4; // green-50 — subtle fresh tint
+  // Layout
+  --page-bg: #f0fdf4;
   --page-text: #1e293b;
   --sidebar-bg: #ffffff;
   --content-bg: #f0fdf4;
+
+  // Dashboard cards
+  --dash-card-bg: #ffffff;
+  --dash-card-bg-alt: #f0fdf4;
+  --dash-card-bg-gradient: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  --dash-card-border: rgba(16, 185, 129, 0.25);
+  --dash-card-inner-bg: rgba(16, 185, 129, 0.06);
+  --dash-icon-bg: rgba(16, 185, 129, 0.1);
+
+  // Dashboard text
+  --dash-text: #1e293b;
+  --dash-text-muted: #475569;
+  --dash-text-subtle: #64748b;
+  --dash-text-accent: #059669;
+
+  // Dashboard components
+  --dash-progress-bg: #e2e8f0;
+  --dash-code-bg: #f0fdf4;
+  --dash-badge-border: rgba(16, 185, 129, 0.5);
+  --dash-input-bg: #ffffff;
+  --dash-input-border: rgba(16, 185, 129, 0.3);
+  --dash-input-text: #1e293b;
+  --dash-table-stripe: rgba(16, 185, 129, 0.05);
 }
 
 body {
@@ -562,7 +610,79 @@ $sidebar-transition: 0.25s ease;
 }
 
 // ============================================================================
-// LIGHT MODE OVERRIDES
+// DASHBOARD UTILITY CLASSES  (consume CSS custom properties above)
+// ============================================================================
+
+// Cards
+.dash-card {
+  background: var(--dash-card-bg) !important;
+  border: 1px solid var(--dash-card-border) !important;
+  border-radius: 16px !important;
+  color: var(--dash-text) !important;
+}
+.dash-card-alt {
+  background: var(--dash-card-bg-alt) !important;
+  border: 1px solid var(--dash-card-border) !important;
+  border-radius: 16px !important;
+  color: var(--dash-text) !important;
+}
+.dash-card-gradient {
+  background: var(--dash-card-bg-gradient) !important;
+  border: 1px solid var(--dash-card-border) !important;
+  border-radius: 16px !important;
+  color: var(--dash-text) !important;
+}
+
+// Inner panels / code blocks / stripes
+.dash-inner {
+  background: var(--dash-card-inner-bg) !important;
+}
+.dash-icon-wrap {
+  background: var(--dash-icon-bg) !important;
+  border: 1px solid var(--dash-card-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dash-code {
+  background: var(--dash-code-bg) !important;
+  color: var(--dash-text-accent) !important;
+  border-color: var(--dash-badge-border) !important;
+}
+.dash-progress-track {
+  background: var(--dash-progress-bg) !important;
+}
+
+// Inputs / form controls inside dashboard
+.dash-input {
+  background: var(--dash-input-bg) !important;
+  border-color: var(--dash-input-border) !important;
+  color: var(--dash-input-text) !important;
+  &::placeholder { color: var(--dash-text-muted); }
+  &:focus {
+    background: var(--dash-input-bg) !important;
+    color: var(--dash-input-text) !important;
+    border-color: var(--dash-text-accent) !important;
+    box-shadow: 0 0 0 0.15rem rgba(52, 211, 153, 0.15);
+  }
+}
+
+// Text helpers
+.dash-text        { color: var(--dash-text) !important; }
+.dash-text-muted  { color: var(--dash-text-muted) !important; }
+.dash-text-subtle { color: var(--dash-text-subtle) !important; }
+.dash-text-accent { color: var(--dash-text-accent) !important; }
+
+// Table stripe
+.dash-table {
+  color: var(--dash-text);
+  tr:nth-child(even) td { background: var(--dash-table-stripe); }
+  td, th { border-color: var(--dash-card-border) !important; }
+}
+
+// ============================================================================
+// LIGHT MODE OVERRIDES — SIDEBAR
 // ============================================================================
 [data-theme="light"] {
   .admin-sidebar {
