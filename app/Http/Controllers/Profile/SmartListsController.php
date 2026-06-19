@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SmartListCreateRequest;
-use App\Models\SmartList;
+use App\Services\SmartListService;
 use Illuminate\Http\Request;
 
 class SmartListsController extends Controller
 {
+    public function __construct(
+        protected SmartListService $smartListService
+    ) {}
+
     /**
      * Display smart lists page.
      */
@@ -16,9 +20,7 @@ class SmartListsController extends Controller
     {
         $user = auth()->user() ?? \App\Models\User::first();
         
-        $smartLists = SmartList::where('user_id', $user->id)
-            ->with('meals')
-            ->get();
+        $smartLists = $this->smartListService->getSmartLists($user);
             
         return view('dashboard.smart-lists', compact('user', 'smartLists'));
     }
@@ -29,18 +31,12 @@ class SmartListsController extends Controller
     public function store(SmartListCreateRequest $request)
     {
         $user = auth()->user() ?? \App\Models\User::first();
-        $data = $request->validated();
-        $data['user_id'] = $user->id;
-        $data['description'] = $data['description'] ?? '';
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images/smart-lists'), $imageName);
-            $data['image'] = $imageName;
-        }
-
-        SmartList::create($data);
+        
+        $this->smartListService->createSmartList(
+            $user,
+            $request->validated(),
+            $request->file('image')
+        );
 
         return redirect()->back()->with('success', 'Smart List created successfully.');
     }
@@ -51,9 +47,8 @@ class SmartListsController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = auth()->user() ?? \App\Models\User::first();
-        $smartList = SmartList::where('user_id', $user->id)->findOrFail($id);
-        $smartList->meals()->detach();
-        $smartList->delete();
+        
+        $this->smartListService->deleteSmartList($user, (int) $id);
 
         return redirect()->back()->with('success', 'Smart List deleted successfully.');
     }

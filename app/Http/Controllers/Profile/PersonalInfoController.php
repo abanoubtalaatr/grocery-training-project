@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\ProfileService;
 use Illuminate\Http\Request;
 
 class PersonalInfoController extends Controller
 {
+    public function __construct(
+        protected ProfileService $profileService
+    ) {}
+
     /**
      * Display personal info dashboard page.
      */
@@ -24,12 +29,7 @@ class PersonalInfoController extends Controller
     {
         $user = auth()->user() ?? \App\Models\User::first();
         
-        $data = $request->validated();
-        if (isset($data['phone'])) {
-            $data['phone'] = preg_replace('/\s+/', '', $data['phone']);
-        }
-        
-        $user->update($data);
+        $this->profileService->updatePersonalInfo($user, $request->validated());
         
         return redirect()->back()->with('success', 'Personal information updated successfully.');
     }

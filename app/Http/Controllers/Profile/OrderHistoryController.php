@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Services\OrderHistoryService;
 use Illuminate\Http\Request;
 
 class OrderHistoryController extends Controller
 {
+    public function __construct(
+        protected OrderHistoryService $orderHistoryService
+    ) {}
+
     /**
      * Display order history page.
      */
@@ -15,10 +19,7 @@ class OrderHistoryController extends Controller
     {
         $user = auth()->user() ?? \App\Models\User::first();
         
-        $orders = Order::where('user_id', $user->id)
-            ->with(['items.meal.category', 'address'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orders = $this->orderHistoryService->getOrderHistory($user);
             
         return view('dashboard.order-history', compact('user', 'orders'));
     }

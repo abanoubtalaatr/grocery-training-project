@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Services\OrderHistoryService;
 use Illuminate\Http\Request;
 
 class PaymentWalletController extends Controller
 {
+    public function __construct(
+        protected OrderHistoryService $orderHistoryService
+    ) {}
+
     /**
      * Display payment & wallet page.
      */
@@ -15,11 +19,7 @@ class PaymentWalletController extends Controller
     {
         $user = auth()->user() ?? \App\Models\User::first();
         
-        $orders = Order::where('user_id', $user->id)
-            ->where('status', '!=', 'cancelled')
-            ->with(['items.meal.category', 'address'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orders = $this->orderHistoryService->getPaymentHistory($user);
             
         $totalAmount = (float) $orders->sum('total');
         

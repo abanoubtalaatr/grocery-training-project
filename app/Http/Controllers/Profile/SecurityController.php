@@ -4,18 +4,22 @@ namespace App\Http\Controllers\Profile;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangePasswordRequest;
+use App\Services\ProfileService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class SecurityController extends Controller
 {
+    public function __construct(
+        protected ProfileService $profileService
+    ) {}
+
     /**
      * Display security settings page.
      */
     public function index(Request $request)
     {
         $user = auth()->user() ?? \App\Models\User::first();
-        $sessions = $user->tokens()->get();
+        $sessions = $this->profileService->getSessions($user);
 
         return view('dashboard.security', compact('user', 'sessions'));
     }
@@ -27,9 +31,7 @@ class SecurityController extends Controller
     {
         $user = auth()->user() ?? \App\Models\User::first();
         
-        $user->update([
-            'password' => Hash::make($request->input('password')),
-        ]);
+        $this->profileService->updatePassword($user, $request->input('password'));
 
         return redirect()->back()->with('success', 'Password changed successfully.');
     }
