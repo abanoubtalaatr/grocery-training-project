@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Admin\Services\CategoryService;
 use App\Models\Meal;
 use App\Observers\MealObserver;
 use Illuminate\Support\ServiceProvider;
@@ -22,5 +23,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Meal::observe(MealObserver::class);
+        $this->app->singleton(CategoryService::class);
     }
 }
