@@ -69,41 +69,62 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 |--------------------------------------------------------------------------
 */
 
-// Route::prefix('profile')->name('profile.')->group(function () {
+Route::prefix('profile')->name('profile.')->group(function () {
 
-//   // Personal Info
-//   Route::get('/personal-info', [PersonalInfoController::class, 'index'])
-//     ->name('personal-info');
+  // Personal Info
+  Route::get('/personal-info', [PersonalInfoController::class, 'index'])
+    ->name('personal-info');
+  Route::post('/personal-info', [PersonalInfoController::class, 'update'])
+    ->name('personal-info.update');
 
-//   // Payment & Wallet
-//   Route::get('/payment-wallet', [PaymentWalletController::class, 'index'])
-//     ->name('payment-wallet');
+  // Payment & Wallet
+  Route::get('/payment-wallet', [PaymentWalletController::class, 'index'])
+    ->name('payment-wallet');
 
-//   // Order History
-//   Route::get('/order-history', [OrderHistoryController::class, 'index'])
-//     ->name('order-history');
+  // Order History
+  Route::get('/order-history', [OrderHistoryController::class, 'index'])
+    ->name('order-history');
 
-//   // Smart Lists
-//   Route::get('/smart-lists', [SmartListsController::class, 'index'])
-//     ->name('smart-lists');
+  // Smart Lists
+  Route::get('/smart-lists', [SmartListsController::class, 'index'])
+    ->name('smart-lists');
+  Route::post('/smart-lists', [SmartListsController::class, 'store'])
+    ->name('smart-lists.store');
+  Route::delete('/smart-lists/{id}', [SmartListsController::class, 'destroy'])
+    ->name('smart-lists.destroy');
 
-//   // Addresses
-//   Route::get('/addresses', [AddressesController::class, 'index'])
-//     ->name('addresses');
+  // Addresses
+  Route::get('/addresses', [AddressesController::class, 'index'])
+    ->name('addresses');
+  Route::post('/addresses', [AddressesController::class, 'store'])
+    ->name('addresses.store');
+  Route::put('/addresses/{id}', [AddressesController::class, 'update'])
+    ->name('addresses.update');
+  Route::post('/addresses/{id}/default', [AddressesController::class, 'setDefault'])
+    ->name('addresses.default');
+  Route::delete('/addresses/{id}', [AddressesController::class, 'destroy'])
+    ->name('addresses.destroy');
 
-//   // Security & Login
-//   Route::get('/security', [SecurityController::class, 'index'])
-//     ->name('security');
+  // Security & Login
+  Route::get('/security', [SecurityController::class, 'index'])
+    ->name('security');
+  Route::post('/security/password', [SecurityController::class, 'updatePassword'])
+    ->name('security.password');
 
-//   // Loyalty & Rewards
-//   Route::get('/loyalty-rewards', [LoyaltyRewardsController::class, 'index'])
-//     ->name('loyalty-rewards');
+  // Loyalty & Rewards
+  Route::get('/loyalty-rewards', [LoyaltyRewardsController::class, 'index'])
+    ->name('loyalty-rewards');
 
-//   // Help & Support
-//   Route::get('/help-support', [HelpSupportController::class, 'index'])
-//     ->name('help-support');
+  // Help & Support
+  Route::get('/help-support', [HelpSupportController::class, 'index'])
+    ->name('help-support');
+  Route::post('/help-support', [HelpSupportController::class, 'store'])
+    ->name('help-support.store');
 
-//   // Settings
-//   Route::get('/settings', [SettingsController::class, 'index'])
-//     ->name('settings');
-// });
+  // Settings
+  Route::get('/settings', [SettingsController::class, 'index'])
+    ->name('settings');
+  Route::post('/settings', [SettingsController::class, 'update'])
+    ->name('settings.update');
+});
+

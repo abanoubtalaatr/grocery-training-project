@@ -103,6 +103,73 @@
             </div>
         </div>
 
+        {{-- ── MY ACCOUNT ── --}}
+        <div class="nav-group">
+            <div class="nav-group-label"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#group-account"
+                 aria-expanded="true">
+                <span class="group-label-text">My Account</span>
+                <i class="fas fa-chevron-down nav-chevron"></i>
+            </div>
+            <div class="collapse show nav-group-items" id="group-account">
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.personal-info') }}" class="{{ request()->routeIs('profile.personal-info') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-user"></i></span>
+                        <span class="sidebar-label">Personal Info</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.payment-wallet') }}" class="{{ request()->routeIs('profile.payment-wallet') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-wallet"></i></span>
+                        <span class="sidebar-label">Payment & Wallet</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.order-history') }}" class="{{ request()->routeIs('profile.order-history') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-history"></i></span>
+                        <span class="sidebar-label">Order History</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.smart-lists') }}" class="{{ request()->routeIs('profile.smart-lists') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-list-ul"></i></span>
+                        <span class="sidebar-label">Smart Lists</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.addresses') }}" class="{{ request()->routeIs('profile.addresses') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-map-marker-alt"></i></span>
+                        <span class="sidebar-label">Addresses</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.security') }}" class="{{ request()->routeIs('profile.security') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-shield-alt"></i></span>
+                        <span class="sidebar-label">Security & Login</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.loyalty-rewards') }}" class="{{ request()->routeIs('profile.loyalty-rewards') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-award"></i></span>
+                        <span class="sidebar-label">Loyalty & Rewards</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.help-support') }}" class="{{ request()->routeIs('profile.help-support') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-question-circle"></i></span>
+                        <span class="sidebar-label">Help & Support</span>
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ route('profile.settings') }}" class="{{ request()->routeIs('profile.settings') ? 'active' : '' }}">
+                        <span class="sidebar-item-icon"><i class="fas fa-sliders-h"></i></span>
+                        <span class="sidebar-label">Preferences</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         {{-- ── SETTINGS ── --}}
         <div class="nav-group">
             <div class="nav-group-label"
