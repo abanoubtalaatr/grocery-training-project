@@ -97,4 +97,20 @@ class Address extends Model
         }
         return $code !== '' ? $code . $phone : $phone;
     }
+
+    
+    /**
+     * Scope implicit route binding to the authenticated user's own addresses.
+     *
+     * This is what replaces `$user->addresses()->findOrFail($id)` in every
+     * controller method: an address belonging to someone else (or that
+     * doesn't exist) simply won't resolve, and Laravel will throw a
+     * ModelNotFoundException — handled globally as a 404, exactly like before.
+     */
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)
+            ->where('user_id', auth()->id())
+            ->first();
+    }
 }

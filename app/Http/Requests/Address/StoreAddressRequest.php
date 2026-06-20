@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Address;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AddressRequest extends FormRequest
+class StoreAddressRequest extends FormRequest
 {
-    
     public function authorize(): bool
     {
-        return true;
+        return $this->user() !== null;
     }
 
     public function rules(): array
@@ -18,19 +16,8 @@ class AddressRequest extends FormRequest
         return [
             'label' => ['nullable', 'string', 'max:255'],
             'full_name' => ['required', 'string', 'min:2', 'max:255'],
-            'phone' => [
-                'required',
-                'string',
-                'min:10',
-                'max:20',
-                'regex:/^\+?[1-9]\d{9,14}$/'
-            ],
-            'country_code' => [
-                'nullable',
-                'string',
-                'max:5',
-                'regex:/^\+\d{1,4}$/'
-            ],
+            'phone' => ['required', 'string', 'min:10', 'max:20', 'regex:/^\+?[1-9]\d{9,14}$/'],
+            'country_code' => ['nullable', 'string', 'max:5', 'regex:/^\+\d{1,4}$/'],
             'street_address' => ['required', 'string', 'min:5', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'floor' => ['nullable', 'string', 'max:50'],
