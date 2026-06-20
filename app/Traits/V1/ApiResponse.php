@@ -1,26 +1,35 @@
 <?php
-namespace App\Traits\V1;
-use Illuminate\Http\Request;
+
+namespace App\Traits;
+
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+
 trait ApiResponse
 {
-    public static function successResponse($message = null, $result = null, $code = 200):JsonResponse
+    /**
+     * Return a standardized success JSON response.
+     */
+    protected function success( $data = [], string $message = 'Success', int $statusCode = 200): JsonResponse
     {
-        $response = [
-            'status' => $code,
+        return response()->json([
+            'status'  => true,
             'message' => $message,
-            'data'    => $result,
-        ];
-        return response()->json($response, $code);
+            'data'    => $data,
+        ], $statusCode);
     }
 
-    public static function errorResponse($message = null, $result = null, $code = 404):JsonResponse
+    /**
+     * Return a standardized error JSON response.
+     */
+    protected function error(string $message = 'Error occurred', int $statusCode = Response::HTTP_BAD_REQUEST, mixed $errors = null): JsonResponse
     {
-        $response = [
-            'status' => $code,
+        return response()->json([
+            'status'  => false,
             'message' => $message,
-            'data'    => $result,
-        ];
-        return response()->json($response, $code);
+            'errors'  => $errors,
+        ], $statusCode);
     }
+    
+   
 }
